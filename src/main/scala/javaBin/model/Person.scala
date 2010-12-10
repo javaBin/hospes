@@ -1,4 +1,4 @@
-package javaBin.model {
+package javaBin.model
 
 import net.liftweb.mapper._
 import net.liftweb.common._
@@ -21,6 +21,4 @@ class Person extends MegaProtoUser[Person] {
   object address extends MappedText(this) {
     override def displayName = "Address"
   }
-}
-
 }

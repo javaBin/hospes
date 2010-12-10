@@ -4,4 +4,3 @@
 target
 lib_managed
 project/boot
-*.db
