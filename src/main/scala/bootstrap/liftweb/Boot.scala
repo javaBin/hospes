@@ -1,14 +1,13 @@
 package bootstrap.liftweb
 
-import net.liftweb.http.{LiftRules}
 import net.liftweb.sitemap.{SiteMap, Menu, Loc}
 import net.liftweb.sitemap.Loc._
 import net.liftweb.mapper.{Schemifier, DB, StandardDBVendor, DefaultConnectionIdentifier}
 import net.liftweb.util.{Props}
 import net.liftweb.common.{Full}
-import net.liftweb.http.{S}
 import javaBin.model._
 import util.Random
+import net.liftweb.http.{UnauthorizedResponse, LiftRules, S}
 
 
 class Boot {
@@ -26,26 +25,29 @@ class Boot {
 
     Schemifier.schemify(true, Schemifier.infoF _, Person, Company, Membership)
     Range(0, 20).map{"Company" + _}.map{
-      name =>
+      companyName =>
         val company = Company.create
-        company.name.set(name)
+        company.name.set(companyName)
+        if (companyName == "Company0")
+          company.hideMembers.set(true)
         company.save
         Range(0, Random.nextInt(20) + 1).map{"Person" + _}.map{
-          name =>
+          personName =>
             val person = Person.create
-            person.firstName.set(name)
-            person.firstName.set("Personson")
+            person.email.set(personName + "@" + companyName + ".com")
+            person.firstName.set(personName)
+            person.lastName.set("Personson")
+            person.password.set("passord")
+            person.employer.set(company.id)
+            person.validated.set(true)
+            person.isContactPerson.set(personName == "Person0")
             person.save
             val membership = Membership.create
             membership.person.set(person.id)
             membership.companyPaid.set(company.id)
-            membership.year.set(2010)
+            membership.year.set(if (companyName == "Company8") 2009 else 2010)
             membership.save
             person
-        }.headOption.foreach{
-          person =>
-            company.contactPerson.set(person.id)
-            company.save
         }
     }
 
@@ -53,10 +55,12 @@ class Boot {
 
     val entries =
       List(Menu("Home") / "index") :::
-              List(Menu(Loc("Static", Link(List("static"), true, "/static/index"), "Static Content"))) :::
-              Person.sitemap :::
-              Company.menus :::
-              Nil
+      List(Menu(Loc("Static", Link(List("static"), true, "/static/index"), "Static Content"))) :::
+      Person.sitemap :::
+      Company.menus :::
+      List(Menu("Member list") / "members") :::
+      List(Menu("Company") / "companyEdit" >> Person.loginFirst >> If(() => Person.currentUser.map(_.isContactPerson.get).openOr(false), () => new UnauthorizedResponse("No access"))) :::
+      Nil
     LiftRules.setSiteMapFunc(() => SiteMap(entries: _*))
 
     LiftRules.early.append(_.setCharacterEncoding("UTF-8"))

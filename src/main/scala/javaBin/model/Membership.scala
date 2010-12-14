@@ -13,4 +13,5 @@ class Membership extends LongKeyedMapper[Membership] with IdPK {
   object companyPaid extends LongMappedMapper(this, Company) {
     override def dbColumnName = "company_paid_id"
   }
+  def isExpired = year != 2010
 }
