@@ -1,14 +1,13 @@
 package bootstrap.liftweb
 
-import net.liftweb.sitemap.{SiteMap, Menu, Loc}
+import net.liftweb.sitemap.{SiteMap, Menu}
 import net.liftweb.sitemap.Loc._
 import net.liftweb.mapper.{Schemifier, DB, StandardDBVendor, DefaultConnectionIdentifier}
 import net.liftweb.util.{Props}
 import net.liftweb.common.{Full}
 import javaBin.model._
 import util.Random
-import net.liftweb.http.{UnauthorizedResponse, LiftRules, S}
-
+import net.liftweb.http.{RedirectResponse, UnauthorizedResponse, LiftRules, S}
 
 class Boot {
   def boot {
@@ -54,13 +53,11 @@ class Boot {
     LiftRules.addToPackages("javaBin")
 
     val entries =
-      List(Menu("Home") / "index") :::
-      List(Menu(Loc("Static", Link(List("static"), true, "/static/index"), "Static Content"))) :::
+      List(Menu("default") / "index" >> Hidden >> EarlyResponse(() => Full(RedirectResponse("user_mgt/login")))) :::
       Person.sitemap :::
       Company.menus :::
       List(Menu("Member list") / "members") :::
-      List(Menu("Company") / "companyEdit" >> Person.loginFirst >> If(() => Person.currentUser.map(_.isContactPerson.get).openOr(false), () => new UnauthorizedResponse("No access"))) :::
-      Nil
+      List(Menu("Company") / "companyEdit" >> Person.loginFirst >> If(() => Person.currentUser.map(_.isContactPerson.get).openOr(false), () => new UnauthorizedResponse("No access"))) ::: Nil
     LiftRules.setSiteMapFunc(() => SiteMap(entries: _*))
 
     LiftRules.early.append(_.setCharacterEncoding("UTF-8"))
