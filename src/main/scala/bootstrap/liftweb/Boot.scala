@@ -22,6 +22,8 @@ class Boot {
       DB.defineConnectionManager(DefaultConnectionIdentifier, vendor)
     }
 
+    LiftRules.dispatch.append(Person.openIDVendor.dispatchPF)
+
     Schemifier.schemify(true, Schemifier.infoF _, Person, Company, Membership)
     Range(0, 20).map{"Company" + _}.map{
       companyName =>

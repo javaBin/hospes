@@ -2,8 +2,10 @@ package javaBin.model
 
 import net.liftweb.mapper._
 import net.liftweb.common._
+import net.liftweb.openid.{SimpleOpenIDVendor, MetaOpenIDProtoUser, OpenIDProtoUser}
+import net.liftweb.http.TemplateFinder
 
-object Person extends Person with MetaMegaProtoUser[Person] {
+object Person extends Person with MetaOpenIDProtoUser[Person] {
   override def dbTableName = "person"
   override def screenWrap = Full(<lift:surround with="default" at="content">
       <lift:bind/>
@@ -11,10 +13,18 @@ object Person extends Person with MetaMegaProtoUser[Person] {
   override def signupFields = List(email, firstName, lastName, address, phoneNumber)
   override def fieldOrder = List(email, firstName, lastName, address, phoneNumber)
   override def skipEmailValidation = true
+  override def loginXhtml =
+    TemplateFinder.findAnyTemplate("templates-hidden" ::  "loginFormContent" :: Nil).map(
+      template =>
+        <form method="post">
+          {template}
+        </form>
+    ).openOr(super.loginXhtml)
 }
 
-class Person extends MegaProtoUser[Person] {
+class Person extends OpenIDProtoUser[Person] {
   def getSingleton = Person
+  def openIDVendor = SimpleOpenIDVendor
   object phoneNumber extends MappedText(this) {
     override def displayName = "Phone number"
   }
