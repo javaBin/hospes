@@ -11,7 +11,7 @@ import javaBin.model.Company
 
 class MemberList {
   def companies(companyTemplate: NodeSeq): NodeSeq =
-    Company.findAll.filter{_.paidMemberships.exists(!_.isExpired)}.flatMap {
+    Company.findAll.filter{_.paidMemberships.exists(_.isCurrent)}.flatMap {
       company =>
         def bindPersons(personTemplate: NodeSeq): NodeSeq =
           if (company.hideMembers)
