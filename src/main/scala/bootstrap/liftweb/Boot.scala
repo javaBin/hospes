@@ -3,14 +3,16 @@ package bootstrap.liftweb
 import net.liftweb.sitemap.{SiteMap, Menu}
 import net.liftweb.sitemap.Loc._
 import net.liftweb.mapper.{Schemifier, DB, StandardDBVendor, DefaultConnectionIdentifier}
-import net.liftweb.util.{Props}
-import net.liftweb.common.{Full}
+import net.liftweb.util.Props
+import net.liftweb.common.Full
 import javaBin.model._
-import util.Random
-import net.liftweb.http.{RedirectResponse, UnauthorizedResponse, LiftRules, S}
+import net.liftweb.http.{UnauthorizedResponse, LiftRules, S}
+import net.liftweb.widgets.autocomplete.AutoComplete
 
 class Boot {
   def boot {
+    AutoComplete.init
+
     if (!DB.jndiJdbcConnAvailable_?) {
       val vendor =
         new StandardDBVendor(Props.get("db.driver") openOr "org.h2.Driver",
@@ -23,41 +25,38 @@ class Boot {
     }
 
     Schemifier.schemify(true, Schemifier.infoF _, Person, Company, Membership)
-    Range(0, 20).map{"Company" + _}.map{
-      companyName =>
-        val company = Company.create
-        company.name.set(companyName)
-        if (companyName == "Company0")
-          company.hideMembers.set(true)
-        company.save
-        Range(0, Random.nextInt(20) + 1).map{"Person" + _}.map{
-          personName =>
-            val person = Person.create
-            person.email.set(personName + "@" + companyName + ".com")
-            person.firstName.set(personName)
-            person.lastName.set("Personson")
-            person.password.set("passord")
-            person.employer.set(company.id)
-            person.validated.set(true)
-            person.isContactPerson.set(personName == "Person0")
-            person.save
-            val membership = Membership.create
-            membership.person.set(person.id)
-            membership.companyPaid.set(company.id)
-            membership.year.set(if (companyName == "Company8") 2009 else 2010)
-            membership.save
-            person
+    (0 to 10).map {
+      personNumber =>
+        val person = Person.create
+        val personName = "Person" + personNumber
+        person.email.set(personName + "@lainternet.com")
+        person.validated.set(true)
+        person.firstName.set(personName)
+        person.lastName.set("Personson")
+        person.password.set("passord")
+        person.save
+        if (personNumber == 0 || personNumber == 1) {
+          (0 to 10).map {
+            _ =>
+              val membership = Membership.create
+              membership.year.set(if (personNumber == 0) 2010 else 2009)
+              membership.boughtBy.set(person.id)
+              membership.save
+          }
         }
+        person
     }
 
     LiftRules.addToPackages("javaBin")
 
     val entries =
-      List(Menu("default") / "index" >> Hidden >> EarlyResponse(() => Full(RedirectResponse("user_mgt/login")))) :::
+      List(Menu("Home") / "index") :::
       Person.sitemap :::
-      Company.menus :::
-      List(Menu("Member list") / "members") :::
-      List(Menu("Company") / "companyEdit" >> Person.loginFirst >> If(() => Person.currentUser.map(_.isContactPerson.get).openOr(false), () => new UnauthorizedResponse("No access"))) ::: Nil
+      //Company.menus :::
+      //List(Menu("Member list") / "members") :::
+      List(Menu("Memberships") / "memberships" >> Person.loginFirst >> If(() => Person.currentUser.map(_.thisYearsBoughtMemberships.size > 0).openOr(false), () => new UnauthorizedResponse("No access"))) :::
+      //List(Menu("Company") / "companyEdit" >> Person.loginFirst >> If(() => Person.currentUser.map(_.isContactPerson.get).openOr(false), () => new UnauthorizedResponse("No access"))) :::
+      Nil
     LiftRules.setSiteMapFunc(() => SiteMap(entries: _*))
 
     LiftRules.early.append(_.setCharacterEncoding("UTF-8"))

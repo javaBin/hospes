@@ -4,6 +4,7 @@ import net.liftweb.mapper._
 
 object Company extends Company with LongKeyedMetaMapper[Company] with CRUDify[Long, Company]
 
+@deprecated("Company is out?")
 class Company extends LongKeyedMapper[Company] with IdPK with OneToMany[Long, Company] {
   def getSingleton = Company
   object name extends MappedString(this, 255)
