@@ -8,55 +8,50 @@ import net.liftweb.http.js.JsCmds
 import net.liftweb.widgets.autocomplete.AutoComplete
 import javaBin.model.{Membership, Person}
 import net.liftweb.http.{S, SHtml}
-import xml.{Text, NodeSeq}
-import net.liftweb.common.Full
+import xml.NodeSeq
 import net.liftweb.mapper.{MappedEmail, By, Like}
 
 class Memberships {
   private lazy val dateTimeFormat = new DateTimeFormatterBuilder().append(ISODateTimeFormat.date).appendLiteral(' ').append(ISODateTimeFormat.hourMinute)
   lazy val dateTimeFormatter = dateTimeFormat.toFormatter
 
-  val emailForm: NodeSeq = <b:email/>
-            <b:submit/>;
+  def submitMember(email: String, errorFieldId: String, membership: Membership): Unit = {
+    val person = Person.find(By(Person.email, email)).openOr{
+      val person = Person.create
+      person.email.set(email)
+      person
+    }
+    println("Deesa onea: " + person)
+    if (person.hasActiveMembership) {
+      S.error(errorFieldId, "User " + email + " already have membership")
+    } else if (!MappedEmail.validEmailAddr_?(email)) {
+      S.error(errorFieldId, "Invalid email address " + email)
+    } else {
+      person.save
+      membership.member.set(person.id)
+      membership.save
+    }
+  }
+
+  def findMatches(current: String, limit: Int): Seq[String] = {
+    println("Limit: " + limit)
+    if (current.size < 3)
+      List[String]()
+    else
+      Person.findAll(Like(Person.email, current + "%")).filter(!_.hasActiveMembership).take(limit).map(_.email.get)
+  }
 
   private def bindForm(membership: Membership) = {
-    val email = membership.member.obj.map(_.email.get).openOr("")
-    var emailSet = email;
-    val autocompleteField = AutoComplete(email, {
-      (current, limit) =>
-        println("Limit: " + limit)
-        if (current.size < 3)
-          List[String]()
-        else
-          Person.findAll(Like(Person.email, current + "%")).filter(!_.hasActiveMembership).map(_.email.get).take(limit)
-    }, emailSet = _)
-    val ids = (autocompleteField \\ "input").filter(_.attribute("type") == Some(Text("text"))).map(_.attribute("id"))
-    val autocompleteFieldId: String = ids(0).map(_(0).toString).getOrElse("")
-    println("Autocompletefieldid: " + autocompleteFieldId)
-    object fieldIdentifier extends FieldIdentifier {
-      override def uniqueFieldId = Full(autocompleteFieldId)
-    }
+    val emailForm = <b:email/>
+            <span b:errorId=" " class="field_error">
+              &nbsp;
+            </span>;
+    val originalEmail = membership.member.obj.map(_.email.get).openOr("")
+    val errorFieldId = Helpers.nextFuncName
+    val autocompleteField = AutoComplete(originalEmail, findMatches(_, _), submitMember(_, errorFieldId, membership))
     bind("b", emailForm,
       "email" -> autocompleteField,
-      "submit" -> SHtml.ajaxSubmit("Save", {
-        () =>
-          val person = Person.find(By(Person.email, emailSet)).openOr {
-            val person = Person.create
-            person.email.set(emailSet)
-            person
-          }
-          println("Deesa onea: " + person)
-          if (person.hasActiveMembership) {
-            S.error(List(FieldError(fieldIdentifier, Text("User " + emailSet + " already have membership"))))
-          } else if (!MappedEmail.validEmailAddr_?(emailSet)) {
-            S.error(List(FieldError(fieldIdentifier, Text("Invalid email address " + emailSet))))
-          } else {
-            person.save
-            membership.member.set(person.id)
-            membership.save
-          }
-          JsCmds.Noop
-      }))
+      AttrBindParam("errorId", errorFieldId, "id"))
   }
 
   def render(template: NodeSeq): NodeSeq = {

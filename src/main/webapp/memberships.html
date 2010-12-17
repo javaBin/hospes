@@ -2,17 +2,16 @@
   <h2>Memberships</h2>
   <table>
     <thead>
-    <td>Bought</td>
-    <td>Member email</td>
-    <td>&nbsp;</td>
+    <td width="50%">Member email</td>
+    <td width="50%">Bought</td>
     </thead>
     <lift:memberships>
       <tr>
         <td>
-          <membership:boughtDate/>
+          <membership:emailForm/>
         </td>
         <td>
-          <membership:emailForm/>
+          <membership:boughtDate/>
         </td>
       </tr>
     </lift:memberships>
