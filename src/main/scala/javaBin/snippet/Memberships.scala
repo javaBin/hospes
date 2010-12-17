@@ -14,7 +14,7 @@ class Memberships {
   private lazy val dateTimeFormat = new DateTimeFormatterBuilder().append(ISODateTimeFormat.date).appendLiteral(' ').append(ISODateTimeFormat.hourMinute)
   lazy val dateTimeFormatter = dateTimeFormat.toFormatter
 
-  private def submitMember(emailField: => String, errorFieldId: String, membership: Membership): JsCmd = {
+  private def submitMember(emailField: => String, errorFieldId: String, infoFieldId: String, membership: Membership): JsCmd = {
     var jsCmd = JsCmds.Noop
     val email = emailField
     val person = Person.find(By(Person.email, email)).openOr{
@@ -27,10 +27,15 @@ class Memberships {
     } else if (!MappedEmail.validEmailAddr_?(email)) {
       S.error(errorFieldId, "Invalid email address " + email)
     } else {
+      if (!person.saved_?) {
+        jsCmd = jsCmd & JsCmds.SetHtml(infoFieldId, Text("Created new member"))
+      } else {
+        jsCmd = jsCmd & JsCmds.SetHtml(infoFieldId, Text("Added to member"))
+      }
       person.save
       membership.member.set(person.id)
       membership.save
-      jsCmd = JsCmds.SetHtml(errorFieldId, Text(""))
+      jsCmd = jsCmd & JsCmds.SetHtml(errorFieldId, Text(""))
     }
     jsCmd
   }
@@ -38,10 +43,12 @@ class Memberships {
   private def bindForm(membership: Membership, emailForm: NodeSeq) = {
     var currentEmail = membership.member.obj.map(_.email.get).openOr("")
     val errorFieldId = Helpers.nextFuncName
+    val infoFieldId = Helpers.nextFuncName
     bind("b", emailForm,
       "email" -> SHtml.text(currentEmail, currentEmail = _),
-      "submit" -> SHtml.ajaxSubmit("Save", () => submitMember(currentEmail, errorFieldId, membership)),
-      AttrBindParam("errorId", errorFieldId, "id"))
+      "submit" -> SHtml.ajaxSubmit("Save", () => submitMember(currentEmail, errorFieldId, infoFieldId, membership)),
+      AttrBindParam("errorId", errorFieldId, "id"),
+      AttrBindParam("infoId", infoFieldId, "id"))
   }
 
   def render(template: NodeSeq): NodeSeq = {
