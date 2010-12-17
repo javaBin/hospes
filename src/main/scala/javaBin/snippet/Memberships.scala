@@ -4,18 +4,19 @@ import net.liftweb.util._
 import Helpers._
 import org.joda.time.DateTime
 import org.joda.time.format.{DateTimeFormatterBuilder, ISODateTimeFormat}
-import net.liftweb.http.js.JsCmds
-import net.liftweb.widgets.autocomplete.AutoComplete
 import javaBin.model.{Membership, Person}
 import net.liftweb.http.{S, SHtml}
-import xml.NodeSeq
 import net.liftweb.mapper.{MappedEmail, By, Like}
+import net.liftweb.http.js.{JsCmd, JsCmds}
+import xml.{Text, NodeSeq}
 
 class Memberships {
   private lazy val dateTimeFormat = new DateTimeFormatterBuilder().append(ISODateTimeFormat.date).appendLiteral(' ').append(ISODateTimeFormat.hourMinute)
   lazy val dateTimeFormatter = dateTimeFormat.toFormatter
 
-  def submitMember(email: String, errorFieldId: String, membership: Membership): Unit = {
+  private def submitMember(emailField: => String, errorFieldId: String, membership: Membership): JsCmd = {
+    var jsCmd = JsCmds.Noop
+    val email = emailField
     val person = Person.find(By(Person.email, email)).openOr{
       val person = Person.create
       person.email.set(email)
@@ -30,10 +31,12 @@ class Memberships {
       person.save
       membership.member.set(person.id)
       membership.save
+      jsCmd = JsCmds.SetHtml(errorFieldId, Text(""))
     }
+    jsCmd
   }
 
-  def findMatches(current: String, limit: Int): Seq[String] = {
+  private def findMatches(current: String, limit: Int): Seq[String] = {
     println("Limit: " + limit)
     if (current.size < 3)
       List[String]()
@@ -43,14 +46,15 @@ class Memberships {
 
   private def bindForm(membership: Membership) = {
     val emailForm = <b:email/>
+              <b:submit/>
             <span b:errorId=" " class="field_error">
               &nbsp;
             </span>;
-    val originalEmail = membership.member.obj.map(_.email.get).openOr("")
+    var currentEmail = membership.member.obj.map(_.email.get).openOr("")
     val errorFieldId = Helpers.nextFuncName
-    val autocompleteField = AutoComplete(originalEmail, findMatches(_, _), submitMember(_, errorFieldId, membership))
     bind("b", emailForm,
-      "email" -> autocompleteField,
+      "email" -> SHtml.text(currentEmail, currentEmail = _),
+      "submit" -> SHtml.ajaxSubmit("Save", () => submitMember(currentEmail, errorFieldId, membership)),
       AttrBindParam("errorId", errorFieldId, "id"))
   }
 
