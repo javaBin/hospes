@@ -8,7 +8,13 @@
     <lift:memberships>
       <tr>
         <td>
-          <membership:emailForm/>
+          <membership:emailForm>
+            <b:email/>
+            <b:submit/>
+            <span b:errorId=" " class="field_error">
+              &nbsp;
+            </span>
+          </membership:emailForm>
         </td>
         <td>
           <membership:boughtDate/>

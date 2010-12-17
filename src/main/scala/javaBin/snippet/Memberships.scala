@@ -22,7 +22,6 @@ class Memberships {
       person.email.set(email)
       person
     }
-    println("Deesa onea: " + person)
     if (person.hasActiveMembership) {
       S.error(errorFieldId, "User " + email + " already have membership")
     } else if (!MappedEmail.validEmailAddr_?(email)) {
@@ -36,20 +35,7 @@ class Memberships {
     jsCmd
   }
 
-  private def findMatches(current: String, limit: Int): Seq[String] = {
-    println("Limit: " + limit)
-    if (current.size < 3)
-      List[String]()
-    else
-      Person.findAll(Like(Person.email, current + "%")).filter(!_.hasActiveMembership).take(limit).map(_.email.get)
-  }
-
-  private def bindForm(membership: Membership) = {
-    val emailForm = <b:email/>
-              <b:submit/>
-            <span b:errorId=" " class="field_error">
-              &nbsp;
-            </span>;
+  private def bindForm(membership: Membership, emailForm: NodeSeq) = {
     var currentEmail = membership.member.obj.map(_.email.get).openOr("")
     val errorFieldId = Helpers.nextFuncName
     bind("b", emailForm,
@@ -65,7 +51,7 @@ class Memberships {
           (membership, nodeSeq) =>
             bind("membership", template,
               "boughtDate" -> dateTimeFormatter.print(new DateTime(membership.boughtDate.get)),
-              "emailForm" -> SHtml.ajaxForm(bindForm(membership), JsCmds.Noop)
+              "emailForm" -> SHtml.ajaxForm(bindForm(membership, chooseTemplate("membership", "emailForm", template)), JsCmds.Noop)
             ) ++ nodeSeq
         }
     }.openOr(NodeSeq.Empty)
