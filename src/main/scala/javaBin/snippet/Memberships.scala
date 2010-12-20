@@ -6,7 +6,7 @@ import org.joda.time.DateTime
 import org.joda.time.format.{DateTimeFormatterBuilder, ISODateTimeFormat}
 import javaBin.model.{Membership, Person}
 import net.liftweb.http.{S, SHtml}
-import net.liftweb.mapper.{MappedEmail, By, Like}
+import net.liftweb.mapper.{MappedEmail, By}
 import net.liftweb.http.js.{JsCmd, JsCmds}
 import xml.{Text, NodeSeq}
 
@@ -23,14 +23,14 @@ class Memberships {
       person
     }
     if (person.hasActiveMembership) {
-      S.error(errorFieldId, "User " + email + " already have membership")
+      S.error(errorFieldId, S.?("has.active.membership", email))
     } else if (!MappedEmail.validEmailAddr_?(email)) {
-      S.error(errorFieldId, "Invalid email address " + email)
+      S.error(errorFieldId, S.?("invalid.email.address", email))
     } else {
       if (!person.saved_?) {
-        jsCmd = jsCmd & JsCmds.SetHtml(infoFieldId, Text("Created new member"))
+        jsCmd = jsCmd & JsCmds.SetHtml(infoFieldId, Text(S.?("created.new.member")))
       } else {
-        jsCmd = jsCmd & JsCmds.SetHtml(infoFieldId, Text("Added to member"))
+        jsCmd = jsCmd & JsCmds.SetHtml(infoFieldId, Text(S.?("added.to.member")))
       }
       person.save
       membership.member.set(person.id)

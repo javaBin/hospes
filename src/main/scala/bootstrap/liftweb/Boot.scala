@@ -53,9 +53,9 @@ class Boot {
 
     val unauthorizedResponse = () => new UnauthorizedResponse("No access")
     val entries =
-      List(Menu("Home") / "index") :::
+      List(Menu(S.?("home.menu.title")) / "index") :::
       Person.sitemap :::
-      List(Menu("Memberships") / "memberships" >> Person.loginFirst >> If(() => Person.currentUser.map(_.thisYearsBoughtMemberships.size > 0).openOr(false), unauthorizedResponse)) :::
+      List(Menu(S.?("memberships.menu.title")) / "memberships" >> Person.loginFirst >> If(() => Person.currentUser.map(_.thisYearsBoughtMemberships.size > 0).openOr(false), unauthorizedResponse)) :::
       List(Person.logoutMenuLoc).flatten(a => a) :::
       Nil
     LiftRules.setSiteMapFunc(() => SiteMap(entries: _*))

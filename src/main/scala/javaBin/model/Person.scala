@@ -4,6 +4,7 @@ import net.liftweb.mapper._
 import net.liftweb.common._
 import net.liftweb.sitemap.Loc.Hidden
 import javaBin.util.XMLUtil._
+import net.liftweb.http.S
 
 object Person extends Person with MetaMegaProtoUser[Person] {
   override def dbTableName = "person"
@@ -20,6 +21,8 @@ object Person extends Person with MetaMegaProtoUser[Person] {
   override def changePasswordXhtml = super.changePasswordXhtml.addChild(errorMsgXhtml)
   override def signupXhtml(user: Person) = super.signupXhtml(user).addChild(errorMsgXhtml)
 
+  override def signupMailSubject = S.?("sign.up.confirmation")
+
   override def lostPasswordMenuLocParams = Hidden :: super.lostPasswordMenuLocParams
   override lazy val sitemap = List(loginMenuLoc, createUserMenuLoc, lostPasswordMenuLoc, editUserMenuLoc, changePasswordMenuLoc, validateUserMenuLoc, resetPasswordMenuLoc).flatten(a => a)
 }
@@ -27,10 +30,10 @@ object Person extends Person with MetaMegaProtoUser[Person] {
 class Person extends MegaProtoUser[Person] with OneToMany[Long, Person] {
   def getSingleton = Person
   object phoneNumber extends MappedText(this) {
-    override def displayName = "Phone number"
+    override def displayName = S.?("phone.number")
   }
   object address extends MappedText(this) {
-    override def displayName = "Address"
+    override def displayName = S.?("address")
   }
   object memberships extends MappedOneToMany(Membership, Membership.member)
   object boughtMemberships extends MappedOneToMany(Membership, Membership.boughtBy)
