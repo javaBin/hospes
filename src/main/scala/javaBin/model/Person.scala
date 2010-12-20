@@ -2,15 +2,26 @@ package javaBin.model
 
 import net.liftweb.mapper._
 import net.liftweb.common._
+import net.liftweb.sitemap.Loc.Hidden
+import javaBin.util.XMLUtil._
 
 object Person extends Person with MetaMegaProtoUser[Person] {
   override def dbTableName = "person"
   override def screenWrap = Full(<lift:surround with="default" at="content">
       <lift:bind/>
   </lift:surround>)
-  override def signupFields = List(email, firstName, lastName, address, phoneNumber)
+  override def signupFields = List(email, firstName, lastName, address, phoneNumber, password)
   override def fieldOrder = List(email, firstName, lastName, address, phoneNumber)
-  override def skipEmailValidation = true
+
+  def errorMsgXhtml = <lift:msgs showAll="true"><lift:error_class>field_error</lift:error_class></lift:msgs>
+  override def loginXhtml = super.loginXhtml.addChild(errorMsgXhtml)
+  override def lostPasswordXhtml = super.lostPasswordXhtml.addChild(errorMsgXhtml)
+  override def editXhtml(user: Person) = super.editXhtml(user).addChild(errorMsgXhtml)
+  override def changePasswordXhtml = super.changePasswordXhtml.addChild(errorMsgXhtml)
+  override def signupXhtml(user: Person) = super.signupXhtml(user).addChild(errorMsgXhtml)
+
+  override def lostPasswordMenuLocParams = Hidden :: super.lostPasswordMenuLocParams
+  override lazy val sitemap = List(loginMenuLoc, createUserMenuLoc, lostPasswordMenuLoc, editUserMenuLoc, changePasswordMenuLoc, validateUserMenuLoc, resetPasswordMenuLoc).flatten(a => a)
 }
 
 class Person extends MegaProtoUser[Person] with OneToMany[Long, Person] {

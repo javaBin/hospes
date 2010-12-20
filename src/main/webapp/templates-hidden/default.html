@@ -20,6 +20,14 @@
   color: red;
 }
 
+.field_error ul {
+  margin-left: 0;
+}
+
+.field_error li {
+  list-style-type: none;
+}
+
 .sidebar ul {
 	margin:0;
 	padding:0;
@@ -65,13 +73,9 @@
 
       <hr/>
 
-      <div class="column span-6 colborder sidebar">
+      <div class="column span-6 coborder sidebar">
         <hr class="space" />
         <lift:Menu.builder />	
-        <div>
-          <lift:Msgs showAll="true"/>
-          <hr class="space" />
-        </div>
       </div>
 
       <div class="column span-17 last">

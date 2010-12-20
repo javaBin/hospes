@@ -3,15 +3,17 @@ package bootstrap.liftweb
 import net.liftweb.sitemap.{SiteMap, Menu}
 import net.liftweb.sitemap.Loc._
 import net.liftweb.mapper.{Schemifier, DB, StandardDBVendor, DefaultConnectionIdentifier}
-import net.liftweb.util.Props
-import net.liftweb.common.Full
 import javaBin.model._
 import net.liftweb.http.{UnauthorizedResponse, LiftRules, S}
 import net.liftweb.widgets.autocomplete.AutoComplete
+import net.liftweb.common.Full
+import net.liftweb.util.{Mailer, Props}
 
 class Boot {
   def boot {
     AutoComplete.init
+
+    Mailer.hostFunc = () => Props.get("smtp.host") openOr "localhost"
 
     if (!DB.jndiJdbcConnAvailable_?) {
       val vendor =
@@ -49,13 +51,12 @@ class Boot {
 
     LiftRules.addToPackages("javaBin")
 
+    val unauthorizedResponse = () => new UnauthorizedResponse("No access")
     val entries =
       List(Menu("Home") / "index") :::
       Person.sitemap :::
-      //Company.menus :::
-      //List(Menu("Member list") / "members") :::
-      List(Menu("Memberships") / "memberships" >> Person.loginFirst >> If(() => Person.currentUser.map(_.thisYearsBoughtMemberships.size > 0).openOr(false), () => new UnauthorizedResponse("No access"))) :::
-      //List(Menu("Company") / "companyEdit" >> Person.loginFirst >> If(() => Person.currentUser.map(_.isContactPerson.get).openOr(false), () => new UnauthorizedResponse("No access"))) :::
+      List(Menu("Memberships") / "memberships" >> Person.loginFirst >> If(() => Person.currentUser.map(_.thisYearsBoughtMemberships.size > 0).openOr(false), unauthorizedResponse)) :::
+      List(Person.logoutMenuLoc).flatten(a => a) :::
       Nil
     LiftRules.setSiteMapFunc(() => SiteMap(entries: _*))
 
