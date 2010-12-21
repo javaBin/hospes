@@ -46,7 +46,7 @@ class Memberships {
     val infoFieldId = Helpers.nextFuncName
     bind("b", emailForm,
       "email" -> SHtml.text(currentEmail, currentEmail = _),
-      "submit" -> SHtml.ajaxSubmit("Save", () => submitMember(currentEmail, errorFieldId, infoFieldId, membership)),
+      "submit" -> SHtml.ajaxSubmit(S.?("save"), () => submitMember(currentEmail, errorFieldId, infoFieldId, membership)),
       AttrBindParam("errorId", errorFieldId, "id"),
       AttrBindParam("infoId", infoFieldId, "id"))
   }
