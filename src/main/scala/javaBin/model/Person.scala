@@ -2,9 +2,12 @@ package javaBin.model
 
 import net.liftweb.mapper._
 import net.liftweb.common._
-import net.liftweb.sitemap.Loc.Hidden
-import javaBin.util.XMLUtil._
 import net.liftweb.http.S
+import net.liftweb.util.Mailer
+import Mailer._
+import net.liftweb.sitemap.{Loc, Menu}
+import Loc._
+import net.liftweb.sitemap.Loc.{If, Template, LocParam, Hidden}
 
 object Person extends Person with MetaMegaProtoUser[Person] {
   override def dbTableName = "person"
@@ -14,17 +17,28 @@ object Person extends Person with MetaMegaProtoUser[Person] {
   override def signupFields = List(email, firstName, lastName, address, phoneNumber, password)
   override def fieldOrder = List(email, firstName, lastName, address, phoneNumber)
 
-  def errorMsgXhtml = <lift:msgs showAll="true"><lift:error_class>field_error</lift:error_class></lift:msgs>
-  override def loginXhtml = super.loginXhtml.addChild(errorMsgXhtml)
-  override def lostPasswordXhtml = super.lostPasswordXhtml.addChild(errorMsgXhtml)
-  override def editXhtml(user: Person) = super.editXhtml(user).addChild(errorMsgXhtml)
-  override def changePasswordXhtml = super.changePasswordXhtml.addChild(errorMsgXhtml)
-  override def signupXhtml(user: Person) = super.signupXhtml(user).addChild(errorMsgXhtml)
-
   override def signupMailSubject = S.?("sign.up.confirmation")
+  override def passwordResetEmailSubject = S.?("reset.password.request")
 
+  lazy val newMemberConfirmationPath = thePath("new_member_confirmation")
+  def newMemberConfirmation(id: String) = {
+    find(By(uniqueId, id)) match {
+      case Full(user) =>
+        user.validated.set(true)
+        user.save
+      case _ =>
+    }
+    passwordReset(id)
+  }
+  def newMemberConfirmationMenuLoc: Box[Menu] =
+    Full(Menu(Loc("NewMemberConfirmation", (newMemberConfirmationPath, true), S.?("new.member.confirmation"), newMemberConfirmationMenuLocParams)))
+  protected def newMemberConfirmationMenuLocParams: List[LocParam[Unit]] =
+    Hidden ::
+    Template(() => wrapIt(newMemberConfirmation(snarfLastItem))) ::
+    If(notLoggedIn_? _, S.??("logout.first")) ::
+    Nil
   override def lostPasswordMenuLocParams = Hidden :: super.lostPasswordMenuLocParams
-  override lazy val sitemap = List(loginMenuLoc, createUserMenuLoc, lostPasswordMenuLoc, editUserMenuLoc, changePasswordMenuLoc, validateUserMenuLoc, resetPasswordMenuLoc).flatten(a => a)
+  override lazy val sitemap = List(loginMenuLoc, createUserMenuLoc, lostPasswordMenuLoc, newMemberConfirmationMenuLoc, editUserMenuLoc, changePasswordMenuLoc, validateUserMenuLoc, resetPasswordMenuLoc).flatten(a => a)
 }
 
 class Person extends MegaProtoUser[Person] with OneToMany[Long, Person] {
@@ -46,6 +60,35 @@ class Person extends MegaProtoUser[Person] with OneToMany[Long, Person] {
     override def defaultValue = false
   }
   def name = Seq(firstName, lastName).mkString(" ")
+  def nameBox = if (firstName.get.size == 0 && lastName.get.size == 0) Empty else Full(name)
+  def mostPresentableName = nameBox.getOrElse(email.get)
   def thisYearsBoughtMemberships = boughtMemberships.filter(_.isCurrent)
   def hasActiveMembership = memberships.exists(_.isCurrent)
+
+  def sendNewMemberConfirmationEmail(other: Person) {
+    val confirmationLink = S.hostAndPath + Person.newMemberConfirmationPath.mkString("/", "/", "/") + uniqueId
+    val msgXml = newMemberConfirmationEmailBody(confirmationLink, other)
+    Mailer.sendMail(From(Person.emailFrom), Subject(S.?("new.member.confirmation")),
+      (To(email) :: xmlToMailBodyType(msgXml) ::
+              (Person.bccEmail.toList.map(BCC(_)))): _*)
+  }
+
+  def newMemberConfirmationEmailBody(confirmationLink: String, other: Person) = {
+    (<html>
+        <head>
+          <title>{S.?("new.member.confirmation")}</title>
+        </head>
+        <body>
+          <p>{S.?("dear")} {mostPresentableName},
+            <br/>
+            <br/>
+            {S.?("click.new.member.confirmation.link", other.mostPresentableName)}
+            <br/><a href={confirmationLink}>{confirmationLink}</a>
+            <br/>
+            <br/>
+            {S.?("thank.you")}
+          </p>
+        </body>
+     </html>)
+  }
 }

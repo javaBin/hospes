@@ -29,6 +29,7 @@ class Memberships {
     } else {
       if (!person.saved_?) {
         jsCmd = jsCmd & JsCmds.SetHtml(infoFieldId, Text(S.?("created.new.member")))
+        person.sendNewMemberConfirmationEmail(Person.currentUser.get)
       } else {
         jsCmd = jsCmd & JsCmds.SetHtml(infoFieldId, Text(S.?("added.to.member")))
       }

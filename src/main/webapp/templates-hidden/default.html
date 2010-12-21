@@ -73,13 +73,14 @@
 
       <hr/>
 
-      <div class="column span-6 coborder sidebar">
+      <div class="column span-6 colborder sidebar">
         <hr class="space" />
-        <lift:Menu.builder />	
+        <lift:Menu.builder />
       </div>
 
       <div class="column span-17 last">
         <lift:bind name="content" />
+        <lift:msgs showAll="true"><lift:error_class>field_error</lift:error_class></lift:msgs>
       </div>
 
       <hr />
