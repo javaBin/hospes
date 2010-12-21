@@ -8,6 +8,7 @@ import Mailer._
 import net.liftweb.sitemap.{Loc, Menu}
 import Loc._
 import net.liftweb.sitemap.Loc.{If, Template, LocParam, Hidden}
+import xml.Elem
 
 object Person extends Person with MetaMegaProtoUser[Person] {
   override def dbTableName = "person"
@@ -65,12 +66,36 @@ class Person extends MegaProtoUser[Person] with OneToMany[Long, Person] {
   def thisYearsBoughtMemberships = boughtMemberships.filter(_.isCurrent)
   def hasActiveMembership = memberships.exists(_.isCurrent)
 
-  def sendNewMemberConfirmationEmail(other: Person) {
-    val confirmationLink = S.hostAndPath + Person.newMemberConfirmationPath.mkString("/", "/", "/") + uniqueId
-    val msgXml = newMemberConfirmationEmailBody(confirmationLink, other)
+  def sendMembershipRenewedConfirmationEmail(other: Person) {
+    mailMe(
+      <html>
+        <head>
+          <title>{S.?("membership.renewed")}</title>
+        </head>
+        <body>
+          <p>{S.?("dear")} {mostPresentableName},
+            <br/>
+            <br/>
+            {S.?("membership.renewed.body", other.mostPresentableName)}
+            <br/><a href={S.hostAndPath}>{S.hostAndPath}</a>
+            <br/>
+            <br/>
+            {S.?("thank.you")}
+          </p>
+        </body>
+      </html>)
+  }
+
+  def mailMe(msgXml: Elem): Unit = {
     Mailer.sendMail(From(Person.emailFrom), Subject(S.?("new.member.confirmation")),
       (To(email) :: xmlToMailBodyType(msgXml) ::
               (Person.bccEmail.toList.map(BCC(_)))): _*)
+  }
+
+  def sendNewMemberConfirmationEmail(other: Person) {
+    val confirmationLink = S.hostAndPath + Person.newMemberConfirmationPath.mkString("/", "/", "/") + uniqueId
+    val msgXml = newMemberConfirmationEmailBody(confirmationLink, other)
+    mailMe(msgXml)
   }
 
   def newMemberConfirmationEmailBody(confirmationLink: String, other: Person) = {

@@ -27,11 +27,13 @@ class Memberships {
     } else if (!MappedEmail.validEmailAddr_?(email)) {
       S.error(errorFieldId, S.?("invalid.email.address", email))
     } else {
+      val buyer = Person.currentUser.get
       if (!person.saved_?) {
         jsCmd = jsCmd & JsCmds.SetHtml(infoFieldId, Text(S.?("created.new.member")))
-        person.sendNewMemberConfirmationEmail(Person.currentUser.get)
+        person.sendNewMemberConfirmationEmail(buyer)
       } else {
         jsCmd = jsCmd & JsCmds.SetHtml(infoFieldId, Text(S.?("added.to.member")))
+        person.sendMembershipRenewedConfirmationEmail(buyer)
       }
       person.save
       membership.member.set(person.id)
