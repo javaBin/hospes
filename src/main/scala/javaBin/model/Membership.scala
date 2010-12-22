@@ -8,7 +8,9 @@ object Membership extends Membership with LongKeyedMetaMapper[Membership] with C
 
 class Membership extends LongKeyedMapper[Membership] with IdPK {
   def getSingleton = Membership
-  object year extends MappedInt(this)
+  object year extends MappedInt(this) {
+    override def defaultValue = currentYear
+  }
   object member extends LongMappedMapper(this, Person) {
     override def dbColumnName = "member_person_id"
   }
@@ -22,5 +24,6 @@ class Membership extends LongKeyedMapper[Membership] with IdPK {
   object boughtBy extends LongMappedMapper(this, Person) {
     override def dbColumnName = "bought_by_person_id"
   }
-  def isCurrent = year == (new DateTime).getYear
+  def isCurrent = year == currentYear
+  def currentYear = (new DateTime).getYear
 }

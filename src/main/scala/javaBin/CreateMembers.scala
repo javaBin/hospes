@@ -11,8 +11,8 @@ object CreateMembers {
       ("user" ->
         ("firstname" -> "Johnny B.") ~
         ("lastname" -> "Goode") ~
-        ("email" -> "jb@goody.net")) ~
-      ("items" -> List(("Tull", 5), ("Fjas", 6)).map{ item =>
+        ("email" -> "person1@lainternet.com")) ~
+      ("items" -> List(("Tull", -5), ("Goody", 6), ("Fjas", 1003)).map{ item =>
         ("name" -> item._1) ~
         ("amount" -> item._2)
       }) ~

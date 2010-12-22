@@ -108,6 +108,7 @@ class Person extends MegaProtoUser[Person] with OneToMany[Long, Person] {
             <br/>
             <br/>
             {S.?("click.new.member.confirmation.link", other.mostPresentableName)}
+            <br/>
             <br/><a href={confirmationLink}>{confirmationLink}</a>
             <br/>
             <br/>
