@@ -1,9 +1,9 @@
-<lift:surround with="default" at="content">
+<lift:surround with="defaultWithoutMsgs" at="content">
   <h2>Memberships</h2>
   <table>
     <thead>
-    <td width="50%">Member email</td>
-    <td width="50%">Bought</td>
+    <td width="75%">Member email</td>
+    <td width="25%">Bought</td>
     </thead>
     <lift:memberships>
       <tr>
@@ -11,12 +11,9 @@
           <membership:emailForm>
             <b:email/>
             <b:submit/>
-            <span b:errorId=" " class="field_error">
-              &nbsp;
-            </span>
-            <span b:infoId=" " class="field_info">
-              &nbsp;
-            </span>
+            <br/>
+            <span b:errorId=" " class="field_error"></span>
+            <span b:infoId=" " class="field_info"></span>
           </membership:emailForm>
         </td>
         <td>

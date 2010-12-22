@@ -8,12 +8,20 @@ import net.liftweb.http.{UnauthorizedResponse, LiftRules, S}
 import net.liftweb.widgets.autocomplete.AutoComplete
 import net.liftweb.common.Full
 import net.liftweb.util.{Mailer, Props}
+import javaBin.rest.MembershipResource
+import javax.mail.{PasswordAuthentication, Authenticator}
 
 class Boot {
   def boot {
     AutoComplete.init
 
-    Mailer.hostFunc = () => Props.get("smtp.host") openOr "localhost"
+    System.setProperty("mail.smtp.host", "smtp.domeneshop.no")
+    System.setProperty("mail.smtp.auth", "true")
+    System.setProperty("mail.smtp.port", "587")
+    Mailer.authenticator = Full(new Authenticator {
+      override def getPasswordAuthentication = new PasswordAuthentication("eventsystems5", "VvM8TKJB")
+    })
+    //Mailer.testModeSend.default.set((msg: MimeMessage) => msg)
 
     if (!DB.jndiJdbcConnAvailable_?) {
       val vendor =
@@ -48,6 +56,8 @@ class Boot {
         }
         person
     }
+
+    LiftRules.dispatch.append(MembershipResource)
 
     LiftRules.addToPackages("javaBin")
 
