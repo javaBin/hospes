@@ -4,8 +4,8 @@ import net.liftweb.http.rest.RestHelper
 import net.liftweb.http._
 import net.liftweb.json.JsonAST
 import net.liftweb.json.JsonAST._
-import net.liftweb.mapper.By
 import javaBin.model.{Membership, Person}
+import net.liftweb.mapper.{MappedEmail, By}
 
 object MembershipResource extends RestHelper {
   serve{
@@ -15,19 +15,27 @@ object MembershipResource extends RestHelper {
   object Positive {
     def unapply[T <: Number](value: T): Option[T] = if (value.doubleValue >= 0.0) Some(value) else None
   }
+
+  object NonZero {
+    def unapply[T <: Number](value: T): Option[T] = if (value.doubleValue != 0.0) Some(value) else None
+  }
+
   class Limited(limit: Int) {
     def unapply[T <: Number](value: T): Option[T] = if (value.doubleValue < limit) Some(value) else None
   }
   object NotMoreThanThousand extends Limited(1000)
 
+  object ValidEmailAddress {
+    def unapply(value: String): Option[String] = if (MappedEmail.validEmailAddr_?(value)) Some(value) else None
+  }
+
   def createMembership(req: JsonAST.JValue): LiftResponse = {
-    println("Request: " + req)
     val people =
       for (JField("user", JObject(user)) <- req;
-           JField("email", JString(email)) <- user;
+           JField("email", JString(ValidEmailAddress(email))) <- user;
            JField("items", JArray(items)) <- req;
            item <- items;
-           JField("amount", JInt(NotMoreThanThousand(Positive(amount)))) <- item)
+           JField("amount", JInt(NotMoreThanThousand(NonZero(Positive(amount))))) <- item)
       yield {
         val person = Person.create
         person.email.set(email)
@@ -38,23 +46,23 @@ object MembershipResource extends RestHelper {
     people.foldRight[LiftResponse](ExplicitBadResponse("No memberships found")) {
       (pair, _) =>
         val (temporaryPerson, amount) = pair
-        val person = Person.find(By(Person.email, temporaryPerson.email)).map {
+        val person = Person.find(By(Person.email, temporaryPerson.email)).map{
           person =>
-            // TODO: Send epost
-            println("bruk gammel person")
-            person
-        }.getOrElse({
           // TODO: Send epost
-          println("lager ny person")
+          //println("bruk gammel person")
+            person
+        }.getOrElse{
+          // TODO: Send epost
+          //println("lager ny person")
           temporaryPerson.password("passord").validated(true).save
           temporaryPerson
-        })
-        (0 until amount.intValue).foreach { _ =>
-          val membership = Membership.create
-          membership.boughtBy.set(person.id)
-          membership.save
         }
-        println("all is ok")
+        (0 until amount.intValue).foreach{
+          _ =>
+            val membership = Membership.create
+            membership.boughtBy.set(person.id)
+            membership.save
+        }
         OkResponse()
     }
   }

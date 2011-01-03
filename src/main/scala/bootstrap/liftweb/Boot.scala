@@ -12,6 +12,7 @@ import javaBin.rest.MembershipResource
 import javax.mail.{PasswordAuthentication, Authenticator}
 
 class Boot {
+
   def boot {
     AutoComplete.init
 
@@ -23,18 +24,8 @@ class Boot {
     })
     //Mailer.testModeSend.default.set((msg: MimeMessage) => msg)
 
-    if (!DB.jndiJdbcConnAvailable_?) {
-      val vendor =
-        new StandardDBVendor(Props.get("db.driver") openOr "org.h2.Driver",
-          Props.get("db.url") openOr "jdbc:h2:mem:db;AUTO_SERVER=TRUE",
-          Props.get("db.user"), Props.get("db.password"))
+    Boot.initiateDatabase
 
-      LiftRules.unloadHooks.append(vendor.closeAllConnections_! _)
-
-      DB.defineConnectionManager(DefaultConnectionIdentifier, vendor)
-    }
-
-    Schemifier.schemify(true, Schemifier.infoF _, Person, Company, Membership)
     (0 to 10).map {
       personNumber =>
         val person = Person.create
@@ -78,5 +69,19 @@ class Boot {
     LiftRules.loggedInTest = Full(() => Person.loggedIn_?)
 
     S.addAround(DB.buildLoanWrapper)
+  }
+}
+
+object Boot {
+  def initiateDatabase: Unit = {
+    if (!DB.jndiJdbcConnAvailable_?) {
+      val vendor =
+        new StandardDBVendor(Props.get("db.driver") openOr "org.h2.Driver",
+          Props.get("db.url") openOr "jdbc:h2:mem:db;AUTO_SERVER=TRUE",
+          Props.get("db.user"), Props.get("db.password"))
+      LiftRules.unloadHooks.append(vendor.closeAllConnections_! _)
+      DB.defineConnectionManager(DefaultConnectionIdentifier, vendor)
+    }
+    Schemifier.schemify(true, Schemifier.infoF _, Person, Company, Membership)
   }
 }
