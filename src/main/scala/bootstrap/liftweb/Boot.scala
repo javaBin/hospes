@@ -5,7 +5,6 @@ import net.liftweb.sitemap.Loc._
 import net.liftweb.mapper.{Schemifier, DB, StandardDBVendor, DefaultConnectionIdentifier}
 import javaBin.model._
 import net.liftweb.http.{UnauthorizedResponse, LiftRules, S}
-import net.liftweb.widgets.autocomplete.AutoComplete
 import net.liftweb.common.Full
 import net.liftweb.util.{Mailer, Props}
 import javaBin.rest.MembershipResource
@@ -14,15 +13,12 @@ import javax.mail.{PasswordAuthentication, Authenticator}
 class Boot {
 
   def boot {
-    AutoComplete.init
-
     System.setProperty("mail.smtp.host", "smtp.domeneshop.no")
     System.setProperty("mail.smtp.auth", "true")
     System.setProperty("mail.smtp.port", "587")
     Mailer.authenticator = Full(new Authenticator {
       override def getPasswordAuthentication = new PasswordAuthentication("eventsystems5", "VvM8TKJB")
     })
-    //Mailer.testModeSend.default.set((msg: MimeMessage) => msg)
 
     Boot.initiateDatabase
 
@@ -40,7 +36,7 @@ class Boot {
           (0 to 10).map {
             _ =>
               val membership = Membership.create
-              membership.year.set(if (personNumber == 0) 2010 else 2009)
+              membership.year.set(if (personNumber == 0) 2011 else 2010)
               membership.boughtBy.set(person.id)
               membership.save
           }
@@ -56,7 +52,7 @@ class Boot {
     val entries =
       List(Menu(S.?("home.menu.title")) / "index") :::
       Person.sitemap :::
-      List(Menu(S.?("memberships.menu.title")) / "memberships" >> Person.loginFirst >> If(() => Person.currentUser.map(_.thisYearsBoughtMemberships.size > 0).openOr(false), unauthorizedResponse)) :::
+      List(Menu(S.?("memberships.menu.title")) / Membership.membershipsPath >> Person.loginFirst >> If(() => Person.currentUser.map(_.thisYearsBoughtMemberships.size > 0).openOr(false), unauthorizedResponse)) :::
       List(Person.logoutMenuLoc).flatten(a => a) :::
       Nil
     LiftRules.setSiteMapFunc(() => SiteMap(entries: _*))

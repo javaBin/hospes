@@ -48,13 +48,11 @@ object MembershipResource extends RestHelper {
         val (temporaryPerson, amount) = pair
         val person = Person.find(By(Person.email, temporaryPerson.email)).map{
           person =>
-          // TODO: Send epost
-          //println("bruk gammel person")
+            person.sendSubscriptionsReceivedEmail
             person
         }.getOrElse{
-          // TODO: Send epost
-          //println("lager ny person")
-          temporaryPerson.password("passord").validated(true).save
+          temporaryPerson.validated(true).save
+          //temporaryPerson.sendSubscriptionsReceivedAndUserCreateEmail
           temporaryPerson
         }
         (0 until amount.intValue).foreach{

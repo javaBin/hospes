@@ -4,7 +4,9 @@ import net.liftweb.mapper._
 import java.util.Date
 import org.joda.time.DateTime
 
-object Membership extends Membership with LongKeyedMetaMapper[Membership] with CRUDify[Long, Membership]
+object Membership extends Membership with LongKeyedMetaMapper[Membership] with CRUDify[Long, Membership] {
+  def membershipsPath = "memberships"
+}
 
 class Membership extends LongKeyedMapper[Membership] with IdPK {
   def getSingleton = Membership

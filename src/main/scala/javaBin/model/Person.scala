@@ -73,13 +73,13 @@ class Person extends MegaProtoUser[Person] with OneToMany[Long, Person] {
           <title>{S.?("membership.renewed")}</title>
         </head>
         <body>
-          <p>{S.?("dear")} {mostPresentableName},
+          <p>{S.?("dear")}{mostPresentableName},
             <br/>
-            <br/>
+              <br/>
             {S.?("membership.renewed.body", other.mostPresentableName)}
-            <br/><a href={S.hostAndPath}>{S.hostAndPath}</a>
-            <br/>
-            <br/>
+              <br/> <a href={S.hostAndPath}>{S.hostAndPath}</a>
+              <br/>
+              <br/>
             {S.?("thank.you")}
           </p>
         </body>
@@ -100,21 +100,43 @@ class Person extends MegaProtoUser[Person] with OneToMany[Long, Person] {
 
   def newMemberConfirmationEmailBody(confirmationLink: String, other: Person) = {
     (<html>
-        <head>
-          <title>{S.?("new.member.confirmation")}</title>
-        </head>
-        <body>
-          <p>{S.?("dear")} {mostPresentableName},
+      <head>
+        <title>{S.?("new.member.confirmation")}</title>
+      </head>
+      <body>
+        <p>{S.?("dear")}{mostPresentableName},<br/>
             <br/>
+          {S.?("click.new.member.confirmation.link", other.mostPresentableName)}<br/>
             <br/>
-            {S.?("click.new.member.confirmation.link", other.mostPresentableName)}
+          <a href={confirmationLink}>{confirmationLink}</a> <br/>
             <br/>
-            <br/><a href={confirmationLink}>{confirmationLink}</a>
-            <br/>
-            <br/>
-            {S.?("thank.you")}
-          </p>
-        </body>
-     </html>)
+          {S.?("thank.you")}
+        </p>
+      </body>
+    </html>)
   }
+
+  def sendSubscriptionsReceivedEmail {
+    val subscriptionLink = (S.hostAndPath :: Membership.membershipsPath :: Nil).mkString("/")
+    mailMe(newSubscriptionsReceivedEmail(subscriptionLink))
+  }
+
+  def newSubscriptionsReceivedEmail(subscriptionLink: String) = {
+    (<html>
+      <head>
+        <title>{S.?("new.subscriptions.received")}</title>
+      </head>
+      <body>
+        <p>{S.?("dear")}{mostPresentableName},<br/>
+            <br/>
+          {S.?("new.subscriptions.received.body")}<br/>
+            <br/>
+          <a href={subscriptionLink}>{subscriptionLink}</a> <br/>
+            <br/>
+          {S.?("thank.you")}
+        </p>
+      </body>
+    </html>)
+  }
+
 }
