@@ -20,7 +20,7 @@ object CreateMembers {
   }
 
   def main(args: Array[String]): Unit = {
-    val json = createJson()
+    val json = createJson(args(0))
     Http x ("http://localhost:8080/memberships" << pretty(render(json)) <:< Map("Content-Type" -> "application/json", "Accept" -> "application/json") >|) {
       case (200, _, _, _) => println("Success")
       case (status, _, _, _) => println("Shit: " + status)

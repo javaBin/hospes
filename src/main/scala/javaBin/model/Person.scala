@@ -66,24 +66,29 @@ class Person extends MegaProtoUser[Person] with OneToMany[Long, Person] {
   def thisYearsBoughtMemberships = boughtMemberships.filter(_.isCurrent)
   def hasActiveMembership = memberships.exists(_.isCurrent)
 
-  def sendMembershipRenewedConfirmationEmail(other: Person) {
-    mailMe(
-      <html>
-        <head>
-          <title>{S.?("membership.renewed")}</title>
-        </head>
-        <body>
-          <p>{S.?("dear")}{mostPresentableName},
+  def javaBinMailBody(title: String, body: String, link: String) = {
+    <html>
+      <head>
+        <title>{title}</title>
+      </head>
+      <body>
+        <p>{S.?("dear")} {mostPresentableName}, <br/>
             <br/>
-              <br/>
-            {S.?("membership.renewed.body", other.mostPresentableName)}
-              <br/> <a href={S.hostAndPath}>{S.hostAndPath}</a>
-              <br/>
-              <br/>
-            {S.?("thank.you")}
-          </p>
-        </body>
-      </html>)
+          {body}<br/>
+            <br/>
+          <a href={link}>{link}</a> <br/>
+            <br/>
+          {S.?("thank.you")}
+        </p>
+      </body>
+    </html>
+  }
+
+  def sendMembershipRenewedConfirmationEmail(other: Person) {
+    mailMe(javaBinMailBody(
+      S.?("membership.renewed"),
+      S.?("membership.renewed.body", other.mostPresentableName),
+      S.hostAndPath))
   }
 
   def mailMe(msgXml: Elem): Unit = {
@@ -92,51 +97,28 @@ class Person extends MegaProtoUser[Person] with OneToMany[Long, Person] {
               (Person.bccEmail.toList.map(BCC(_)))): _*)
   }
 
-  def sendNewMemberConfirmationEmail(other: Person) {
-    val confirmationLink = S.hostAndPath + Person.newMemberConfirmationPath.mkString("/", "/", "/") + uniqueId
-    val msgXml = newMemberConfirmationEmailBody(confirmationLink, other)
-    mailMe(msgXml)
-  }
+  def confirmationLink = S.hostAndPath + Person.newMemberConfirmationPath.mkString("/", "/", "/") + uniqueId
 
-  def newMemberConfirmationEmailBody(confirmationLink: String, other: Person) = {
-    (<html>
-      <head>
-        <title>{S.?("new.member.confirmation")}</title>
-      </head>
-      <body>
-        <p>{S.?("dear")}{mostPresentableName},<br/>
-            <br/>
-          {S.?("click.new.member.confirmation.link", other.mostPresentableName)}<br/>
-            <br/>
-          <a href={confirmationLink}>{confirmationLink}</a> <br/>
-            <br/>
-          {S.?("thank.you")}
-        </p>
-      </body>
-    </html>)
+  def sendNewMemberConfirmationEmail(other: Person) {
+    mailMe(javaBinMailBody(
+      S.?("new.member.confirmation"),
+      S.?("click.new.member.confirmation.link", other.mostPresentableName),
+      confirmationLink))
   }
 
   def sendSubscriptionsReceivedEmail {
     val subscriptionLink = (S.hostAndPath :: Membership.membershipsPath :: Nil).mkString("/")
-    mailMe(newSubscriptionsReceivedEmail(subscriptionLink))
+    mailMe(javaBinMailBody(
+      S.?("new.subscriptions.received"),
+      S.?("new.subscriptions.received.body"),
+      subscriptionLink))
   }
 
-  def newSubscriptionsReceivedEmail(subscriptionLink: String) = {
-    (<html>
-      <head>
-        <title>{S.?("new.subscriptions.received")}</title>
-      </head>
-      <body>
-        <p>{S.?("dear")}{mostPresentableName},<br/>
-            <br/>
-          {S.?("new.subscriptions.received.body")}<br/>
-            <br/>
-          <a href={subscriptionLink}>{subscriptionLink}</a> <br/>
-            <br/>
-          {S.?("thank.you")}
-        </p>
-      </body>
-    </html>)
+  def sendSubscriptionsReceivedAndUserCreateEmail {
+    mailMe(javaBinMailBody(
+      S.?("new.subscriptions.received.and.user.created"),
+      S.?("new.subscriptions.received.and.user.created.body"),
+      confirmationLink))
   }
 
 }

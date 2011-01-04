@@ -52,7 +52,7 @@ object MembershipResource extends RestHelper {
             person
         }.getOrElse{
           temporaryPerson.validated(true).save
-          //temporaryPerson.sendSubscriptionsReceivedAndUserCreateEmail
+          temporaryPerson.sendSubscriptionsReceivedAndUserCreateEmail
           temporaryPerson
         }
         (0 until amount.intValue).foreach{
