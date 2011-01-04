@@ -88,7 +88,7 @@ class Person extends MegaProtoUser[Person] with OneToMany[Long, Person] {
     mailMe(javaBinMailBody(
       S.?("membership.renewed"),
       S.?("membership.renewed.body", other.mostPresentableName),
-      S.hostAndPath))
+      S.hostAndPath + Person.editPath.mkString()))
   }
 
   def mailMe(msgXml: Elem): Unit = {
