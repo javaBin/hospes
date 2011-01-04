@@ -16,7 +16,7 @@ class MembershipResourceTest extends JUnit4(MembershipResourceSpec)
 
 object MembershipResourceSpec extends Specification {
 
-  Boot.initiateDatabase
+  Boot.databaseSetup
 
   def personWithEmail(email: String) = Person.find(By(Person.email, email))
 

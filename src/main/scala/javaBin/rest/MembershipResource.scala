@@ -8,8 +8,8 @@ import javaBin.model.{Membership, Person}
 import net.liftweb.mapper.{MappedEmail, By}
 
 object MembershipResource extends RestHelper {
-  serve{
-    case JsonPost("memberships" :: Nil, (json, _)) => createMembership(json)
+  serve {
+    case JsonPost("rest" :: "memberships" :: Nil, (json, _)) => createMembership(json)
   }
 
   object Positive {

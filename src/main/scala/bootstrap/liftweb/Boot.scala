@@ -4,25 +4,17 @@ import net.liftweb.sitemap.{SiteMap, Menu}
 import net.liftweb.sitemap.Loc._
 import net.liftweb.mapper.{Schemifier, DB, StandardDBVendor, DefaultConnectionIdentifier}
 import javaBin.model._
-import net.liftweb.http.{UnauthorizedResponse, LiftRules, S}
 import net.liftweb.common.Full
 import net.liftweb.util.{Mailer, Props}
 import javaBin.rest.MembershipResource
 import javax.mail.{PasswordAuthentication, Authenticator}
+import net.liftweb.http._
+import auth.{userRoles, HttpBasicAuthentication, AuthRole}
 
 class Boot {
 
-  def boot {
-    System.setProperty("mail.smtp.host", "smtp.domeneshop.no")
-    System.setProperty("mail.smtp.auth", "true")
-    System.setProperty("mail.smtp.port", "587")
-    Mailer.authenticator = Full(new Authenticator {
-      override def getPasswordAuthentication = new PasswordAuthentication("eventsystems5", "VvM8TKJB")
-    })
-
-    Boot.initiateDatabase
-
-    (0 to 10).map {
+  def testModePopulate: Unit = {
+    (0 to 10).map{
       personNumber =>
         val person = Person.create
         val personName = "Person" + personNumber
@@ -33,7 +25,7 @@ class Boot {
         person.password.set("passord")
         person.save
         if (personNumber == 0 || personNumber == 1) {
-          (0 to 10).map {
+          (0 to 10).map{
             _ =>
               val membership = Membership.create
               membership.year.set(if (personNumber == 0) 2011 else 2010)
@@ -43,9 +35,41 @@ class Boot {
         }
         person
     }
+  }
+
+  def mailSetup: Unit = {
+    System.setProperty("mail.smtp.host", "smtp.domeneshop.no")
+    System.setProperty("mail.smtp.auth", "true")
+    System.setProperty("mail.smtp.port", "587")
+    Mailer.authenticator = Full(new Authenticator {
+      override def getPasswordAuthentication = new PasswordAuthentication("eventsystems5", "VvM8TKJB")
+    })
+  }
+
+  def restAuthenticationSetup: Unit = {
+    val systemRole = AuthRole("system")
+    val webshopUser = Props.get("webshop.user").openOr("webshop")
+    val webshopPwd = Props.get("webshop.password").openOr("webschopp")
+    LiftRules.authentication = HttpBasicAuthentication("lift") {
+      case (user, pwd, req) =>
+        if (user == webshopUser && pwd == webshopPwd) {
+          userRoles(systemRole :: Nil)
+          true
+        } else
+          false
+    }
+    LiftRules.httpAuthProtectedResource.append{
+      case Req("rest" :: _, _, _) => Full(systemRole)
+    }
+  }
+
+  def boot {
+    mailSetup
+    Boot.databaseSetup
+    testModePopulate
+    restAuthenticationSetup
 
     LiftRules.dispatch.append(MembershipResource)
-
     LiftRules.addToPackages("javaBin")
 
     val unauthorizedResponse = () => new UnauthorizedResponse("No access")
@@ -69,7 +93,7 @@ class Boot {
 }
 
 object Boot {
-  def initiateDatabase: Unit = {
+  def databaseSetup: Unit = {
     if (!DB.jndiJdbcConnAvailable_?) {
       val vendor =
         new StandardDBVendor(Props.get("db.driver") openOr "org.h2.Driver",
