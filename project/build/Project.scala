@@ -17,6 +17,7 @@ class Project(info: ProjectInfo) extends DefaultWebProject(info) {
   val junit        = "junit" % "junit" % "4.5" % "test->default" withSources
   val specs        = "org.scala-tools.testing" %% "specs" % "1.6.5" % "test->default" withSources
 
+  override def jettyPort = 8090
   override def scanDirectories = Nil
   override def jettyWebappPath = webappPath
 }

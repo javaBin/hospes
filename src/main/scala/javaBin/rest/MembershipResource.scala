@@ -2,14 +2,29 @@ package javaBin.rest
 
 import net.liftweb.http.rest.RestHelper
 import net.liftweb.http._
-import net.liftweb.json.JsonAST
 import net.liftweb.json.JsonAST._
 import javaBin.model.{Membership, Person}
 import net.liftweb.mapper.{MappedEmail, By}
+import net.liftweb.common._
+import net.liftweb.json.{JsonParser, JsonAST}
 
 object MembershipResource extends RestHelper {
+
+  // TODO: Hacked to get right encoding
+  def json(req: Req): Box[JsonAST.JValue] =
+    try {
+      import _root_.java.io._
+      req.body.map(b => JsonParser.parse(new InputStreamReader(new ByteArrayInputStream(b), org.apache.http.protocol.HTTP.UTF_8)))
+    } catch {
+      case e: Exception => Failure(e.getMessage, Full(e), Empty)
+    }
+  protected trait RealJsonBody {
+    def body(r: Req): Box[JValue] = json(r)
+  }
+  protected lazy val RealJsonPost = new TestPost[JValue] with JsonTest with RealJsonBody
+
   serve {
-    case JsonPost("rest" :: "memberships" :: Nil, (json, _)) => createMembership(json)
+    case RealJsonPost("rest" :: "memberships" :: Nil, (json, _)) => createMembership(json)
   }
 
   object Positive {
