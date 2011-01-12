@@ -27,7 +27,7 @@ class Memberships {
     } else if (!MappedEmail.validEmailAddr_?(email)) {
       S.error(errorFieldId, S.?("invalid.email.address", email))
     } else {
-      val buyer = Person.currentUser.get
+      val buyer = Person.currentUser.open_!
       if (!person.saved_?) {
         jsCmd = jsCmd & JsCmds.SetHtml(infoFieldId, Text(S.?("created.new.member")))
         person.sendNewMemberConfirmationEmail(buyer)

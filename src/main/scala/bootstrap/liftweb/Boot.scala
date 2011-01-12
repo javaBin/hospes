@@ -50,14 +50,14 @@ class Boot {
     val systemRole = AuthRole("system")
     val webshopUser = Props.get("webshop.user").openOr("webshop")
     val webshopPwd = Props.get("webshop.password").openOr("webschopp")
+
     LiftRules.authentication = HttpBasicAuthentication("lift") {
-      case (user, pwd, req) =>
-        if (user == webshopUser && pwd == webshopPwd) {
-          userRoles(systemRole :: Nil)
-          true
-        } else
-          false
+      case (`webshopUser`, `webshopPwd`, _) =>
+        userRoles(systemRole :: Nil)
+        true
+
     }
+
     LiftRules.httpAuthProtectedResource.append{
       case Req("rest" :: _, _, _) => Full(systemRole)
     }

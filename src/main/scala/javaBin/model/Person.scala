@@ -3,12 +3,11 @@ package javaBin.model
 import net.liftweb.mapper._
 import net.liftweb.common._
 import net.liftweb.http.S
-import net.liftweb.util.Mailer
-import Mailer._
 import net.liftweb.sitemap.{Loc, Menu}
-import Loc._
-import net.liftweb.sitemap.Loc.{If, Template, LocParam, Hidden}
+import net.liftweb.sitemap.Loc._
 import xml.Elem
+import net.liftweb.util.{Props, Mailer}
+import Mailer._
 
 object Person extends Person with MetaMegaProtoUser[Person] {
   override def dbTableName = "person"
@@ -40,6 +39,8 @@ object Person extends Person with MetaMegaProtoUser[Person] {
     Nil
   override def lostPasswordMenuLocParams = Hidden :: super.lostPasswordMenuLocParams
   override lazy val sitemap = List(loginMenuLoc, createUserMenuLoc, lostPasswordMenuLoc, newMemberConfirmationMenuLoc, editUserMenuLoc, changePasswordMenuLoc, validateUserMenuLoc, resetPasswordMenuLoc).flatten(a => a)
+
+  override def emailFrom = Props.get("mail.from", super.emailFrom)
 }
 
 class Person extends MegaProtoUser[Person] with OneToMany[Long, Person] {
@@ -61,8 +62,8 @@ class Person extends MegaProtoUser[Person] with OneToMany[Long, Person] {
     override def defaultValue = false
   }
   def name = Seq(firstName, lastName).mkString(" ")
-  def nameBox = if (firstName.get.size == 0 && lastName.get.size == 0) Empty else Full(name)
-  def mostPresentableName = nameBox.getOrElse(email.get)
+  def nameBox = if (firstName.get.isEmpty && lastName.get.isEmpty) Empty else Full(name)
+  def mostPresentableName = nameBox.openOr(email.get)
   def thisYearsBoughtMemberships = boughtMemberships.filter(_.isCurrent)
   def hasActiveMembership = memberships.exists(_.isCurrent)
 
@@ -92,9 +93,10 @@ class Person extends MegaProtoUser[Person] with OneToMany[Long, Person] {
   }
 
   def mailMe(msgXml: Elem): Unit = {
-    Mailer.sendMail(From(Person.emailFrom), Subject(S.?("new.member.confirmation")),
-      (To(email) :: xmlToMailBodyType(msgXml) ::
-              (Person.bccEmail.toList.map(BCC(_)))): _*)
+    Mailer.sendMail(
+      From(Person.emailFrom),
+      Subject(S.?("new.member.confirmation")),
+      (To(email) :: xmlToMailBodyType(msgXml) :: (Person.bccEmail.toList.map(BCC(_)))): _*)
   }
 
   def confirmationLink = S.hostAndPath + Person.newMemberConfirmationPath.mkString("/", "/", "/") + uniqueId

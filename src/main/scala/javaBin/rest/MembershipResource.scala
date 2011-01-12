@@ -25,6 +25,10 @@ object MembershipResource extends RestHelper {
 
   serve {
     case RealJsonPost("rest" :: "memberships" :: Nil, (json, _)) => createMembership(json)
+    case Get("rest" :: "memberships" :: email :: Nil, _) =>
+      (for{
+        person <- Person.find(By(Person.email, email)) if person.hasActiveMembership
+      } yield NoContentResponse()).or(Full(NotFoundResponse()))
   }
 
   object Positive {
