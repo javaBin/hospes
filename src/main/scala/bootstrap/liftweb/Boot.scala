@@ -25,11 +25,13 @@ class Boot {
         person.password.set("passord")
         person.save
         if (personNumber == 0 || personNumber == 1) {
-          (0 to 10).map{
-            _ =>
+          (0 to 10).foreach{
+            index =>
               val membership = Membership.create
               membership.year.set(if (personNumber == 0) 2011 else 2010)
               membership.boughtBy.set(person.id)
+              if(personNumber == 0 && index == 0)
+                membership.member(person.id)
               membership.save
           }
         }
@@ -64,6 +66,11 @@ class Boot {
   }
 
   def boot {
+
+    LiftRules.liftRequest.append{
+      case Req("h2" :: _, _, _) => false
+    }
+
     mailSetup
     Boot.databaseSetup
     testModePopulate
