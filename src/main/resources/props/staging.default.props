@@ -1,4 +1,4 @@
-mail.from=dev@java.no
+mail.from=staging@java.no
 
 mail.smtp.host=smtp.domeneshop.no
 mail.smtp.port=587

@@ -39,15 +39,6 @@ class Boot {
     }
   }
 
-  def mailSetup: Unit = {
-    System.setProperty("mail.smtp.host", "smtp.domeneshop.no")
-    System.setProperty("mail.smtp.auth", "true")
-    System.setProperty("mail.smtp.port", "587")
-    Mailer.authenticator = Full(new Authenticator {
-      override def getPasswordAuthentication = new PasswordAuthentication("eventsystems5", "VvM8TKJB")
-    })
-  }
-
   def restAuthenticationSetup: Unit = {
     val systemRole = AuthRole("system")
     val webshopUser = Props.get("webshop.user").openOr("webshop")
@@ -65,13 +56,33 @@ class Boot {
     }
   }
 
+  def setupEmail: Unit = {
+    //System.setProperty("mail.smtp.starttls.enable","true");
+    (for {host <- Props.get("mail.smtp.host")
+          port <- Props.get("mail.smtp.port")
+    } yield {
+      System.setProperty("mail.smtp.host", "smtp.domeneshop.no")
+      System.setProperty("mail.smtp.port", "587")
+      val auth = (
+              for {userName <- Props.get("mail.smtp.username")
+                   password <- Props.get("mail.smtp.password")
+              } yield {
+                Mailer.authenticator = Full(new Authenticator {
+                  override def getPasswordAuthentication = new PasswordAuthentication(userName, password)
+                })
+                true
+              }).openOr(false)
+      System.setProperty("mail.smtp.auth", auth.toString)
+    }).openOr(error("Mail is not set up correctly"))
+  }
+
   def boot {
 
     LiftRules.liftRequest.append{
       case Req("h2" :: _, _, _) => false
     }
 
-    mailSetup
+    setupEmail
     Boot.databaseSetup
     testModePopulate
     restAuthenticationSetup
