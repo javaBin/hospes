@@ -43,28 +43,45 @@ class Memberships {
     jsCmd
   }
 
-  private def bindForm(membership: Membership, emailForm: NodeSeq) = {
+  private def bindForm(membership: Membership)(template: NodeSeq) = {
     var currentEmail = membership.member.obj.map(_.email.get).openOr("")
     val errorFieldId = Helpers.nextFuncName
     val infoFieldId = Helpers.nextFuncName
-    bind("b", emailForm,
+    SHtml.ajaxForm(bind("form", template,
       "email" -> SHtml.text(currentEmail, currentEmail = _),
       "submit" -> SHtml.ajaxSubmit(S.?("save"), () => submitMember(currentEmail, errorFieldId, infoFieldId, membership)),
       AttrBindParam("errorId", errorFieldId, "id"),
-      AttrBindParam("infoId", infoFieldId, "id"))
+      AttrBindParam("infoId", infoFieldId, "id")))
   }
 
-  def render(template: NodeSeq): NodeSeq = {
-    Person.currentUser.map{
-      user =>
-        user.thisYearsBoughtMemberships.foldRight(NodeSeq.Empty) {
-          (membership, nodeSeq) =>
-            bind("membership", template,
-              "boughtDate" -> dateTimeFormatter.print(new DateTime(membership.boughtDate.get)),
-              "emailForm" -> SHtml.ajaxForm(bindForm(membership, chooseTemplate("membership", "emailForm", template)), JsCmds.Noop)
-            ) ++ nodeSeq
-        }
+  def bindMemberships(user: Person)(template: NodeSeq): NodeSeq = user.thisYearsBoughtMemberships.flatMap{
+    membership =>
+      bind("membership", template,
+        "boughtDate" -> dateTimeFormatter.print(new DateTime(membership.boughtDate.get)),
+        "form" -> bindForm(membership) _)
+  }
+
+  def addMembership(user: Person, redrawAll: () => JsCmd): NodeSeq =
+    Person.currentUser.filter(_.superUser.is).map{
+      person =>
+        SHtml.ajaxButton(S.?("membership.add"), {
+          () =>
+            val membership = Membership.create.boughtBy(user.id).save
+            redrawAll()
+        })
     }.openOr(NodeSeq.Empty)
+
+  def render(template: NodeSeq): NodeSeq = {
+    val id = Helpers.nextFuncName
+    def redrawAll(): JsCmd = JsCmds.Replace(id, render(template))
+    Person.currentUser.map{
+      person =>
+        <span id={id}>{
+          bind("list", template,
+          "add" -> addMembership(person, redrawAll),
+          "memberships" -> bindMemberships(person) _)}
+        </span>
+    }.openOr(error("User not available"))
   }
 
 }

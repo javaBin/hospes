@@ -52,13 +52,11 @@ class Person extends MegaProtoUser[Person] with OneToMany[Long, Person] {
   object address extends MappedText(this) {
     override def displayName = S.?("address")
   }
-  object memberships extends MappedOneToMany(Membership, Membership.member)
-  object boughtMemberships extends MappedOneToMany(Membership, Membership.boughtBy)
   def name = Seq(firstName, lastName).mkString(" ")
   def nameBox = if (firstName.get.isEmpty && lastName.get.isEmpty) Empty else Full(name)
   def mostPresentableName = nameBox.openOr(email.get)
-  def thisYearsBoughtMemberships = boughtMemberships.filter(_.isCurrent)
-  def hasActiveMembership = memberships.exists(_.isCurrent)
+  def thisYearsBoughtMemberships = Membership.findAll(By(Membership.boughtBy, this.id), By(Membership.year, Membership.currentYear))
+  def hasActiveMembership = Membership.find(By(Membership.member, this.id), By(Membership.year, Membership.currentYear)) != Empty
 
   def javaBinMailBody(title: String, body: String, link: String) = {
     <html>

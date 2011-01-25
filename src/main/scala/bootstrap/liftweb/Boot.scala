@@ -99,7 +99,7 @@ class Boot {
     val entries =
       List(Menu(S.?("home.menu.title")) / "index") :::
       Person.sitemap :::
-      List(Menu(S.?("memberships.menu.title")) / Membership.membershipsPath >> Person.loginFirst >> If(() => Person.currentUser.map(_.thisYearsBoughtMemberships.size > 0).openOr(false), unauthorizedResponse)) :::
+      List(Menu(S.?("memberships.menu.title")) / Membership.membershipsPath >> Person.loginFirst >> If(() => Person.currentUser.map(user => user.thisYearsBoughtMemberships.size > 0 || user.superUser.is).openOr(false), unauthorizedResponse)) :::
       List(Person.logoutMenuLoc).flatten(a => a) :::
       Nil
     LiftRules.setSiteMapFunc(() => SiteMap(entries: _*))
