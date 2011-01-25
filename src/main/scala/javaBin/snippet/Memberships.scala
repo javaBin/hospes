@@ -14,7 +14,7 @@ class Memberships {
   private lazy val dateTimeFormat = new DateTimeFormatterBuilder().append(ISODateTimeFormat.date).appendLiteral(' ').append(ISODateTimeFormat.hourMinute)
   lazy val dateTimeFormatter = dateTimeFormat.toFormatter
 
-  private def submitMember(emailField: => String, errorFieldId: String, infoFieldId: String, membership: Membership): JsCmd = {
+  private def submitMember(emailField: => String, errorFieldId: String, infoFieldId: String, membership: Membership, redrawAll: () => JsCmd): JsCmd = {
     var jsCmd = JsCmds.Noop
     val email = emailField
     val person = Person.find(By(Person.email, email)).openOr{
@@ -38,27 +38,32 @@ class Memberships {
       person.save
       membership.member.set(person.id)
       membership.save
-      jsCmd = jsCmd & JsCmds.SetHtml(errorFieldId, Text(""))
+      jsCmd = redrawAll() & jsCmd
     }
     jsCmd
   }
 
-  private def bindForm(membership: Membership)(template: NodeSeq) = {
-    var currentEmail = membership.member.obj.map(_.email.get).openOr("")
-    val errorFieldId = Helpers.nextFuncName
-    val infoFieldId = Helpers.nextFuncName
-    SHtml.ajaxForm(bind("form", template,
-      "email" -> SHtml.text(currentEmail, currentEmail = _),
-      "submit" -> SHtml.ajaxSubmit(S.?("save"), () => submitMember(currentEmail, errorFieldId, infoFieldId, membership)),
-      AttrBindParam("errorId", errorFieldId, "id"),
-      AttrBindParam("infoId", infoFieldId, "id")))
+  private def bindForm(membership: Membership, redrawAll: () => JsCmd)(template: NodeSeq) = {
+    val errorFieldId = "errorfield" + membership.id
+    val infoFieldId = "infofield" + membership.id
+    membership.member.obj.filter(_.validated).map{
+      person =>
+        Text(person.email.is)
+    }.openOr{
+      var currentEmail = membership.member.obj.map(_.email.get).openOr("")
+      SHtml.ajaxForm(bind("form", template,
+        "email" -> SHtml.text(currentEmail, currentEmail = _),
+        "submit" -> SHtml.ajaxSubmit(S.?("save"), () => submitMember(currentEmail, errorFieldId, infoFieldId, membership, redrawAll)),
+        AttrBindParam("errorId", errorFieldId, "id"),
+        AttrBindParam("infoId", infoFieldId, "id")))
+    }
   }
 
-  def bindMemberships(user: Person)(template: NodeSeq): NodeSeq = user.thisYearsBoughtMemberships.flatMap{
+  def bindMemberships(user: Person, redrawAll: () => JsCmd)(template: NodeSeq): NodeSeq = user.thisYearsBoughtMemberships.flatMap{
     membership =>
       bind("membership", template,
         "boughtDate" -> dateTimeFormatter.print(new DateTime(membership.boughtDate.get)),
-        "form" -> bindForm(membership) _)
+        "form" -> bindForm(membership, redrawAll) _)
   }
 
   def addMembership(user: Person, redrawAll: () => JsCmd): NodeSeq =
@@ -79,7 +84,7 @@ class Memberships {
         <span id={id}>{
           bind("list", template,
           "add" -> addMembership(person, redrawAll),
-          "memberships" -> bindMemberships(person) _)}
+          "memberships" -> bindMemberships(person, redrawAll) _)}
         </span>
     }.openOr(error("User not available"))
   }

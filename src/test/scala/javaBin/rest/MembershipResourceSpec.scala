@@ -101,23 +101,30 @@ object MembershipResourceSpec extends Specification {
       System.nanoTime, System.nanoTime, false,
       () => ParamCalcInfo(Nil, Map.empty, Nil, Empty), Map())
 
-    val email = "membershiptest@eventsystems.com"
-    var person:Person = null
 
-    def response = MembershipResource(req(List("rest", "memberships", email)))().open_!.toResponse.code
+    def response(email: String) = MembershipResource(req(List("rest", "memberships", email)))().open_!.toResponse.code
+
+    val email = "membershiptest@eventsystems.com"
+    var person = Person.create.email(email).firstName("firstname").lastName("lastName").validated(true).password("xxxxxx").saveMe
 
     "return 404 for unknown person" in {
-      response must_== 404
+      response("unknown@man.no") must_== 404
     }
 
     "return 404 for known person without membership" in {
-      person = Person.create.email(email).firstName("firstname").lastName("lastName").validated(true).password("xxxxxx").saveMe
-      response must_== 404
+      response(email) must_== 404
     }
 
-    "return 204 for known person with membership" in {
+    "return 404 for known person with unverified membership" in {
+      val unverifiedEmail = "membershiptest@eventsystems.kom"
+      var unverifiedPerson = Person.create.email(unverifiedEmail).firstName("firstname").lastName("lastName").password("xxxxxx").saveMe
+      Membership.create.member(unverifiedPerson.id).boughtBy(person.id).save
+      response(unverifiedEmail) must_== 404
+    }
+
+    "return 204 for known person with verified membership" in {
       Membership.create.member(person.id).boughtBy(person.id).save
-      response must_== 204
+      response(email) must_== 204
     }
   }
 
