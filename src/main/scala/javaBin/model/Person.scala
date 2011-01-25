@@ -15,6 +15,7 @@ object Person extends Person with MetaMegaProtoUser[Person] {
       <lift:bind/>
   </lift:surround>)
   override def signupFields = List(email, firstName, lastName, address, phoneNumber, password)
+  override def editFields = signupFields
   override def fieldOrder = List(email, firstName, lastName, address, phoneNumber)
 
   override def signupMailSubject = S.?("sign.up.confirmation")
@@ -53,14 +54,6 @@ class Person extends MegaProtoUser[Person] with OneToMany[Long, Person] {
   }
   object memberships extends MappedOneToMany(Membership, Membership.member)
   object boughtMemberships extends MappedOneToMany(Membership, Membership.boughtBy)
-  @deprecated("Company is out?")
-  object employer extends LongMappedMapper(this, Company) {
-    override def dbColumnName = "employer_company_id"
-  }
-  @deprecated("Company is out?")
-  object isContactPerson extends MappedBoolean(this) {
-    override def defaultValue = false
-  }
   def name = Seq(firstName, lastName).mkString(" ")
   def nameBox = if (firstName.get.isEmpty && lastName.get.isEmpty) Empty else Full(name)
   def mostPresentableName = nameBox.openOr(email.get)

@@ -10,6 +10,7 @@ import javaBin.rest.MembershipResource
 import javax.mail.{PasswordAuthentication, Authenticator}
 import net.liftweb.http._
 import auth.{userRoles, HttpBasicAuthentication, AuthRole}
+import java.util.Locale
 
 class Boot {
 
@@ -18,18 +19,17 @@ class Boot {
       personNumber =>
         val person = Person.create
         val personName = "Person" + personNumber
-        person.email.set(personName + "@lainternet.com")
-        person.validated.set(true)
-        person.firstName.set(personName)
-        person.lastName.set("Personson")
-        person.password.set("passord")
-        person.save
+        person.email(personName + "@lainternet.com")
+                .validated(true)
+                .firstName(personName)
+                .lastName("Personson")
+                .password("passord")
+                .superUser(personNumber == 1).save
         if (personNumber == 0 || personNumber == 1) {
           (0 to 10).foreach{
             index =>
               val membership = Membership.create
-              membership.year.set(if (personNumber == 0) 2011 else 2010)
-              membership.boughtBy.set(person.id)
+              membership.year(if (personNumber == 0) 2011 else 2010).boughtBy(person.id)
               if(personNumber == 0 && index == 0)
                 membership.member(person.id)
               membership.save
@@ -77,6 +77,11 @@ class Boot {
   }
 
   def boot {
+    Locale.setDefault(new Locale("nb", "NO"))
+
+    // Needed to get right encoding on subject of mail (and probably other non-xhtml fields)
+    System.setProperty("file.encoding", "UTF-8")
+    LiftRules.localeCalculator = _ => Locale.getDefault
 
     LiftRules.liftRequest.append{
       case Req("h2" :: _, _, _) => false
@@ -120,6 +125,6 @@ object Boot {
       LiftRules.unloadHooks.append(vendor.closeAllConnections_! _)
       DB.defineConnectionManager(DefaultConnectionIdentifier, vendor)
     }
-    Schemifier.schemify(true, Schemifier.infoF _, Person, Company, Membership)
+    Schemifier.schemify(true, Schemifier.infoF _, Person, Membership)
   }
 }

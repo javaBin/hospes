@@ -16,10 +16,6 @@ class Membership extends LongKeyedMapper[Membership] with IdPK {
   object member extends LongMappedMapper(this, Person) {
     override def dbColumnName = "member_person_id"
   }
-  @deprecated("Company is out?")
-  object companyPaid extends LongMappedMapper(this, Company) {
-    override def dbColumnName = "company_paid_id"
-  }
   object boughtDate extends MappedDateTime(this) {
     override def defaultValue = new Date
   }
