@@ -7,6 +7,7 @@ import javaBin.model.{Membership, Person}
 import net.liftweb.mapper.{MappedEmail, By}
 import net.liftweb.common._
 import net.liftweb.json.{JsonParser, JsonAST}
+import dispatch.Http
 
 object MembershipResource extends RestHelper {
 
@@ -26,7 +27,7 @@ object MembershipResource extends RestHelper {
   serve {
     case RealJsonPost("rest" :: "memberships" :: Nil, (json, _)) => createMembership(json)
     case Get("rest" :: "memberships" :: email :: Nil, req) =>
-      val realmail = email + (if (req.path.suffix.isEmpty) "" else "." + req.path.suffix)
+      val realmail = Http -% (email + (if (req.path.suffix.isEmpty) "" else "." + req.path.suffix))
       (for{
         person <- Person.find(By(Person.email, realmail)) if person.hasActiveMembership && person.validated
       } yield NoContentResponse()).or(Full(NotFoundResponse()))
