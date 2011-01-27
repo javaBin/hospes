@@ -1,7 +1,6 @@
 package bootstrap.liftweb
 
 import net.liftweb.sitemap.{SiteMap, Menu}
-import net.liftweb.sitemap.Loc._
 import net.liftweb.mapper.{Schemifier, DB, StandardDBVendor, DefaultConnectionIdentifier}
 import javaBin.model._
 import net.liftweb.common.Full
@@ -95,13 +94,13 @@ class Boot {
     LiftRules.dispatch.append(MembershipResource)
     LiftRules.addToPackages("javaBin")
 
-    val unauthorizedResponse = () => new UnauthorizedResponse("No access")
     val entries =
-      List(Menu(S.?("home.menu.title")) / "index") :::
+      (Menu(S.?("home.menu.title")) / "index") ::
       Person.sitemap :::
-      List(Menu(S.?("memberships.menu.title")) / Membership.membershipsPath >> Person.loginFirst >> If(() => Person.currentUser.map(user => user.thisYearsBoughtMemberships.size > 0 || user.superUser.is).openOr(false), unauthorizedResponse)) :::
-      List(Person.logoutMenuLoc).flatten(a => a) :::
-      Nil
+      (Menu(S.?("admin.menu.title")) / Membership.adminPath >> Person.loginFirst >> Person.isSuperUser) ::
+      (Menu(S.?("memberships.menu.title")) / Membership.membershipsPath >> Person.loginFirst >> Person.isMembershipOwner) ::
+      Person.logoutMenuLoc.toList
+
     LiftRules.setSiteMapFunc(() => SiteMap(entries: _*))
 
     LiftRules.early.append(_.setCharacterEncoding("UTF-8"))

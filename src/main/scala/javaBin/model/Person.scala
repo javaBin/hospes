@@ -2,14 +2,18 @@ package javaBin.model
 
 import net.liftweb.mapper._
 import net.liftweb.common._
-import net.liftweb.http.S
 import net.liftweb.sitemap.{Loc, Menu}
 import net.liftweb.sitemap.Loc._
 import xml.Elem
 import net.liftweb.util.{Props, Mailer}
 import Mailer._
+import net.liftweb.http.{ForbiddenResponse, S}
 
 object Person extends Person with MetaMegaProtoUser[Person] {
+  private val forbiddenResponse = () => new ForbiddenResponse("No access")
+  val isSuperUser = If(() => Person.currentUser.map(_.superUser.is).openOr(false), forbiddenResponse)
+  val isMembershipOwner = If(() => Person.currentUser.map(user => user.thisYearsBoughtMemberships.size > 0).openOr(false), forbiddenResponse)
+
   override def dbTableName = "person"
   override def screenWrap = Full(<lift:surround with="default" at="content">
       <lift:bind/>

@@ -76,12 +76,8 @@ object MembershipResource extends RestHelper {
           temporaryPerson.sendSubscriptionsReceivedAndUserCreateEmail
           temporaryPerson
         }
-        (0 until amount.intValue).foreach{
-          _ =>
-            val membership = Membership.create
-            membership.boughtBy.set(person.id)
-            membership.save
-        }
+        val i = amount.intValue
+        Membership.createMany(i, person)
         OkResponse()
     }
   }

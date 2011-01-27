@@ -66,16 +66,6 @@ class Memberships {
         "form" -> bindForm(membership, redrawAll) _)
   }
 
-  def addMembership(user: Person, redrawAll: () => JsCmd): NodeSeq =
-    Person.currentUser.filter(_.superUser.is).map{
-      person =>
-        SHtml.ajaxButton(S.?("membership.add"), {
-          () =>
-            val membership = Membership.create.boughtBy(user.id).save
-            redrawAll()
-        })
-    }.openOr(NodeSeq.Empty)
-
   def render(template: NodeSeq): NodeSeq = {
     val id = Helpers.nextFuncName
     def redrawAll(): JsCmd = JsCmds.Replace(id, render(template))
@@ -83,7 +73,6 @@ class Memberships {
       person =>
         <span id={id}>{
           bind("list", template,
-          "add" -> addMembership(person, redrawAll),
           "memberships" -> bindMemberships(person, redrawAll) _)}
         </span>
     }.openOr(error("User not available"))
