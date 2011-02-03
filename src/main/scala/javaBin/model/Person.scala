@@ -59,7 +59,11 @@ class Person extends MegaProtoUser[Person] with OneToMany[Long, Person] {
   def name = Seq(firstName, lastName).mkString(" ")
   def nameBox = if (firstName.get.isEmpty && lastName.get.isEmpty) Empty else Full(name)
   def mostPresentableName = nameBox.openOr(email.get)
-  def thisYearsBoughtMemberships = Membership.findAll(By(Membership.boughtBy, this.id), By(Membership.year, Membership.currentYear))
+  def thisYearsBoughtMemberships =
+    Membership.findAll(
+      By(Membership.boughtBy, this.id),
+      By(Membership.year, Membership.currentYear),
+      OrderBy(Membership.id, Ascending))
   def hasActiveMembership = Membership.find(By(Membership.member, this.id), By(Membership.year, Membership.currentYear)) != Empty
 
   def javaBinMailBody(title: String, body: String, link: String) = {
