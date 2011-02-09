@@ -1,15 +1,15 @@
 package bootstrap.liftweb
 
-import net.liftweb.sitemap.{SiteMap, Menu}
-import net.liftweb.mapper.{Schemifier, DB, StandardDBVendor, DefaultConnectionIdentifier}
+import java.util.Locale
 import javaBin.model._
-import net.liftweb.common.Full
-import net.liftweb.util.{Mailer, Props}
 import javaBin.rest.MembershipResource
 import javax.mail.{PasswordAuthentication, Authenticator}
+import net.liftweb.common.Full
 import net.liftweb.http._
 import auth.{userRoles, HttpBasicAuthentication, AuthRole}
-import java.util.Locale
+import net.liftweb.mapper.{Schemifier, DB, StandardDBVendor, DefaultConnectionIdentifier}
+import net.liftweb.sitemap.{SiteMap, Menu}
+import net.liftweb.util.{Mailer, Props}
 
 class Boot {
 
@@ -88,7 +88,11 @@ class Boot {
 
     setupEmail
     Boot.databaseSetup
-    testModePopulate
+    Props.mode match {
+      case Props.RunModes.Development =>
+        testModePopulate
+      case _ =>
+    }
     restAuthenticationSetup
 
     LiftRules.dispatch.append(MembershipResource)
