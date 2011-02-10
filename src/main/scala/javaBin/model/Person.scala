@@ -5,8 +5,9 @@ import net.liftweb.common._
 import net.liftweb.sitemap.{Loc, Menu}
 import net.liftweb.sitemap.Loc._
 import xml.Elem
-import net.liftweb.util.{Props, Mailer}
+import net.liftweb.util.{Props, Mailer, Helpers}
 import Mailer._
+import Helpers._
 import net.liftweb.http.{ForbiddenResponse, S}
 
 object Person extends Person with MetaMegaProtoUser[Person] {
@@ -46,6 +47,12 @@ object Person extends Person with MetaMegaProtoUser[Person] {
   override lazy val sitemap = List(loginMenuLoc, createUserMenuLoc, lostPasswordMenuLoc, newMemberConfirmationMenuLoc, editUserMenuLoc, changePasswordMenuLoc, validateUserMenuLoc, resetPasswordMenuLoc).flatten(a => a)
 
   override def emailFrom = Props.get("mail.from", super.emailFrom)
+
+  override def loginXhtml = super.loginXhtml % ("class" -> "lift-form")
+  override def signupXhtml(user: Person) = super.signupXhtml(user) % ("class" -> "lift-form")
+  override def editXhtml(user: Person) = super.editXhtml(user) % ("class" -> "lift-form")
+  override def changePasswordXhtml = super.changePasswordXhtml % ("class" -> "lift-form")
+  override def lostPasswordXhtml = super.lostPasswordXhtml % ("class" -> "lift-form")
 }
 
 class Person extends MegaProtoUser[Person] with OneToMany[Long, Person] {
