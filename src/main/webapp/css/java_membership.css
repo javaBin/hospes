@@ -13,109 +13,6 @@ Hacking by:
 
 --------------------------------------------------------------------------- */
 
-
-/* ---------------------------- Browser reset ---------------------------- */
-html, body, div, span, applet, object, iframe,
-h1, h2, h3, h4, h5, h6, p,
-blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, font, img,
-ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, dl, dt, dd, ol, ul, li,
-fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td {
-	border:0;
-	margin:0;
-	outline-color:invert;
-	outline-style:none;
-	outline-width:0;
-	vertical-align:baseline;
-}
-
-body {
-	background:#fff /* #E3E3E3 */;
-	font-family:Arial,Helvetica,sans-serif;
-	font-size:76%;
-}
-
-*:focus {
-	outline-color:invert;
-	outline-style:none;
-	outline-width:0;
-}
-
-sup {
-	vertical-align: super;
-}
-
-ol, ul {
-	list-style-image:none;
-	list-style-position:outside;
-}
-
-ul.horiz {
-	list-style-type:none;
-	padding:0pt;
-}
-
-a, a:link, a:visited {
-	text-decoration:none;
-}
-
-a:hover {
-  text-decoration: underline;
-}
-table {
-	border-collapse:separate;
-	border-spacing:0;
-}
-
-caption, th, td {
-	font-weight:normal;
-	text-align:left;
-}
-
-blockquote:before, blockquote:after, q:before, q:after {
-	content:"";
-}
-
-blockquote, q {
-	quotes:"" "";
-}
-
-/* Float me */
-.left {
-	float: left;
-}
-
-.right {
-	float: right;
-}
-
-/* Clearing the float */
-.clearboth {
-	clear: both;
-}
-
-.clearboth:after {
-	clear: both;
-	content: ".";
-	display: block;
-	height: 0;
-	visibility: hidden;
-}
-
-/* IE6 gain .hasLayout */
-* html .clearboth {
-	height: 1%;
-}
-
-/* IE7 gain .hasLayout */
-*+ html .clearboth {
-	min-height: 1%;
-}
-
-.image .caption {
-	font-size:80%;
-	margin:-5px 0px 0px 0px;
-}
-
 /* ------------------- Fonts ------------------- */
 h1, h2, h3, h4, h5, h6 {
 	font-family:Georgia,"Times New Roman",Times,serif;
@@ -165,10 +62,11 @@ h3 a {
 
 /* ---- Forms ---- */
 
-.lift-form table {
+.lift-form table,tr,td {
   width: auto;
   margin-left: 50px;
-  border-spacing: 5px;
+  border-spacing: 10px;
+  padding: 5px;
 }
 
 .field_error {
@@ -180,6 +78,11 @@ h3 a {
 }
 
 .field_error li {
+  color: red;
+  list-style-type: none;
+}
+
+.field_notice li {
   list-style-type: none;
 }
 

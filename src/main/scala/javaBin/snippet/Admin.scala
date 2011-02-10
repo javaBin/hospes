@@ -20,9 +20,7 @@ class Admin {
       val countErrorId = "countError"
       email = email.trim.toLowerCase
       count = count.trim
-      if (email.isEmpty) {
-        S.error(emailErrorId)
-      } else if (!MappedEmail.validEmailAddr_?(email)) {
+      if (email.isEmpty || !MappedEmail.validEmailAddr_?(email)) {
         S.error(emailErrorId, S.?("invalid.email.address", email))
       } else if (Person.find(By(Person.email, email)) == Empty) {
         S.error(emailErrorId, S.?("email.address.unknown", email))

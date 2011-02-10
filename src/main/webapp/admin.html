@@ -4,12 +4,31 @@
   <lift:Admin.createMemberships>
     <h1>Opprett nye javaBin-medlemsskap</h1>
     <table>
-      <tr><td>Epostaddresse for eier:</td><td><create:email/></td><td><span id="emailError" class="field_error"></span></td></tr>
-      <tr><td>Antall:</td><td><create:count/></td><td><span id="countError" class="field_error"></span></td></tr>
-      <tr><td>&nbsp;</td><td><create:submit/></td><td>&nbsp;</td></tr>
+      <tr>
+        <td>Epostaddresse for eier:</td>
+        <td>
+          <create:email/>
+        </td>
+        <td><lift:msg id="emailError" errorClass="field_error"/>
+          <span id="emailError" class="field_error"></span></td>
+      </tr>
+      <tr>
+        <td>Antall:</td>
+        <td>
+          <create:count/>
+        </td>
+        <td><lift:msg id="countError" errorClass="field_error"/></td>
+      </tr>
+      <tr>
+        <td>&nbsp;</td>
+        <td>
+          <create:submit/>
+        </td>
+        <td>&nbsp;</td>
+      </tr>
     </table>
   </lift:Admin.createMemberships>
 
-  <lift:msgs></lift:msgs>
+  <p><lift:msgs><lift:notice_class>field_notice</lift:notice_class></lift:msgs></p>
 
 </lift:surround>
