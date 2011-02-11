@@ -61,8 +61,12 @@ class Memberships {
 
   def bindMemberships(user: Person, redrawAll: () => JsCmd)(template: NodeSeq): NodeSeq = user.thisYearsBoughtMemberships.flatMap{
     membership =>
+      val status = membership.member.obj
+              .map(person => if (person.validated.is) S.?("membership.status.active") else S.?("membership.status.not.validated"))
+              .openOr(S.?("membership.status.unassigned"))
       bind("membership", template,
         "boughtDate" -> dateTimeFormatter.print(new DateTime(membership.boughtDate.get)),
+        "status" -> Text(status),
         "form" -> bindForm(membership, redrawAll) _)
   }
 

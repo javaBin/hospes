@@ -1,29 +1,31 @@
 <lift:surround with="defaultWithoutMsgs" at="content">
   <h2>Medlemskap</h2>
   <lift:memberships>
-    <div class="lift-form">
-      <table>
-        <thead>
-        <td width="75%">Epostadresse</td>
-        <td width="25%">Kjøpt</td>
-        </thead>
-        <list:memberships>
-          <tr>
-            <td>
-              <membership:form>
-                <form:email/>
-                <form:submit/>
-                <br/>
-                <span form:errorId=" " class="field_error"></span>
-                <span form:infoId=" " class="field_info"></span>
-              </membership:form>
-            </td>
-            <td>
-              <membership:boughtDate/>
-            </td>
-          </tr>
-        </list:memberships>
-      </table>
-    </div>
+    <table>
+      <thead>
+      <td width="60%">Epostadresse</td>
+      <td width="20%">Kjøpt</td>
+      <td width="20%">Status</td>
+      </thead>
+      <list:memberships>
+        <tr>
+          <td>
+            <membership:form>
+              <form:email/>
+              <form:submit/>
+              <br/>
+              <span form:errorId=" " class="field_error"></span>
+              <span form:infoId=" " class="field_info"></span>
+            </membership:form>
+          </td>
+          <td>
+            <membership:boughtDate/>
+          </td>
+          <td>
+            <membership:status/>
+          </td>
+        </tr>
+      </list:memberships>
+    </table>
   </lift:memberships>
 </lift:surround>
