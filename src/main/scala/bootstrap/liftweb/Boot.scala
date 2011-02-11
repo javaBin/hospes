@@ -4,12 +4,12 @@ import java.util.Locale
 import javaBin.model._
 import javaBin.rest.MembershipResource
 import javax.mail.{PasswordAuthentication, Authenticator}
-import net.liftweb.common.Full
 import net.liftweb.http._
 import auth.{userRoles, HttpBasicAuthentication, AuthRole}
 import net.liftweb.mapper.{Schemifier, DB, StandardDBVendor, DefaultConnectionIdentifier}
 import net.liftweb.sitemap.{SiteMap, Menu}
 import net.liftweb.util.{Mailer, Props}
+import net.liftweb.common.{Empty, Full}
 
 class Boot {
 
@@ -86,6 +86,8 @@ class Boot {
       case Req("h2" :: _, _, _) => false
     }
 
+    LiftRules.fixCSS("css" :: "java_membership" :: Nil, Empty)
+
     setupEmail
     Boot.databaseSetup
     Props.mode match {
@@ -103,7 +105,7 @@ class Boot {
       Person.sitemap :::
       (Menu(S.?("admin.menu.title")) / Membership.adminPath >> Person.loginFirst >> Person.isSuperUser) ::
       (Menu(S.?("memberships.menu.title")) / Membership.membershipsPath >> Person.loginFirst >> Person.isMembershipOwner) ::
-      Nil
+      Person.logoutMenuLoc.toList
 
     LiftRules.setSiteMapFunc(() => SiteMap(entries: _*))
 

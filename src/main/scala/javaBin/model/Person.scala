@@ -43,8 +43,10 @@ object Person extends Person with MetaMegaProtoUser[Person] {
     Template(() => wrapIt(newMemberConfirmation(snarfLastItem))) ::
     If(notLoggedIn_? _, S.??("logout.first")) ::
     Nil
-  override def lostPasswordMenuLocParams = Hidden :: super.lostPasswordMenuLocParams
-  override lazy val sitemap = List(createUserMenuLoc, lostPasswordMenuLoc, newMemberConfirmationMenuLoc, editUserMenuLoc, changePasswordMenuLoc, validateUserMenuLoc, resetPasswordMenuLoc).flatten(a => a)
+  override protected def lostPasswordMenuLocParams = Hidden :: super.lostPasswordMenuLocParams
+  override protected def logoutMenuLocParams = Hidden :: super.logoutMenuLocParams
+  override protected def loginMenuLocParams = Hidden :: super.loginMenuLocParams
+  override lazy val sitemap = List(loginMenuLoc, createUserMenuLoc, lostPasswordMenuLoc, newMemberConfirmationMenuLoc, editUserMenuLoc, changePasswordMenuLoc, validateUserMenuLoc, resetPasswordMenuLoc).flatten(a => a)
 
   override def emailFrom = Props.get("mail.from", super.emailFrom)
 
