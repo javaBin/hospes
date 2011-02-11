@@ -103,7 +103,7 @@ class Boot {
       Person.sitemap :::
       (Menu(S.?("admin.menu.title")) / Membership.adminPath >> Person.loginFirst >> Person.isSuperUser) ::
       (Menu(S.?("memberships.menu.title")) / Membership.membershipsPath >> Person.loginFirst >> Person.isMembershipOwner) ::
-      Person.logoutMenuLoc.toList
+      Nil
 
     LiftRules.setSiteMapFunc(() => SiteMap(entries: _*))
 

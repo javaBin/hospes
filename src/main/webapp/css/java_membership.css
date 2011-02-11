@@ -53,7 +53,11 @@ h3 a {
 	text-align:center;
 }
 
+#user-information a {
+  color: #fff;
+}
 #user-information {
+  text-align: right;
   color: #fff;
   position: absolute;
   right: 10px;
