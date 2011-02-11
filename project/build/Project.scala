@@ -21,8 +21,6 @@ class Project(info: ProjectInfo) extends DefaultWebProject(info) {
   val jettyTest    = "org.mortbay.jetty" % "jetty" % "6.1.22" % "test" withSources
   val specs        = "org.scala-tools.testing" %% "specs" % "1.6.7" % "test" withSources
 
-  override def jettyContextPath = "/her"
-
   override def jettyPort = 8090
   override def scanDirectories = Nil
   override def jettyWebappPath = webappPath
