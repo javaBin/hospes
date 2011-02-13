@@ -126,11 +126,27 @@ h3 a {
 	margin: 10px 0;
 }
 
-.notice {
-	margin: 0 1px 20px 1px;
+.error {
+  color: red;
+	margin: 20px 1px 20px 1px;
 	padding: 5px 5px 10px 5px;
 	border: 1px solid #90c3eb;
-	border-width: 0 1px 1px 1px;
+	border-width: 1px 1px 1px 1px;
+}
+
+.notice {
+	margin: 20px 1px 20px 1px;
+	padding: 5px 5px 10px 5px;
+	border: 1px solid #90c3eb;
+	border-width: 1px 1px 1px 1px;
+}
+
+.error,.notice ul {
+  margin-bottom: 0;
+}
+
+.error,.notice li {
+  list-style-type: none;
 }
 
 /* ------------------- Footer ------------------- */
