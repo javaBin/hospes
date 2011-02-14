@@ -56,11 +56,11 @@ object MembershipResource extends BetterRestHelper with Extractors {
         val (temporaryPerson, amount) = pair
         val person = Person.find(By(Person.email, temporaryPerson.email)).map{
           person =>
-            person.sendSubscriptionsReceivedEmail
+            person.sendMembershipsReceivedEmail
             person
         }.getOrElse{
           temporaryPerson.validated(true).save
-          temporaryPerson.sendSubscriptionsReceivedAndUserCreateEmail
+          temporaryPerson.sendMembershipsReceivedAndUserCreateEmail
           temporaryPerson
         }
         val i = amount.intValue

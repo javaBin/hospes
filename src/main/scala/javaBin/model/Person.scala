@@ -4,11 +4,11 @@ import net.liftweb.mapper._
 import net.liftweb.common._
 import net.liftweb.sitemap.{Loc, Menu}
 import net.liftweb.sitemap.Loc._
-import xml.Elem
 import net.liftweb.util.{Props, Mailer, Helpers}
 import Mailer._
 import Helpers._
-import net.liftweb.http.{ForbiddenResponse, S}
+import net.liftweb.http.{TemplateFinder, ForbiddenResponse, S}
+import xml.NodeSeq
 
 object Person extends Person with MetaMegaProtoUser[Person] {
   private val forbiddenResponse = () => new ForbiddenResponse("No access")
@@ -75,6 +75,8 @@ class Person extends MegaProtoUser[Person] with OneToMany[Long, Person] {
       OrderBy(Membership.id, Ascending))
   def hasActiveMembership = Membership.find(By(Membership.member, this.id), By(Membership.year, Membership.currentYear)) != Empty
 
+  def template(name: String): NodeSeq = TemplateFinder.findAnyTemplate(List("templates-hidden", name)).open_!
+
   def javaBinMailBody(title: String, body: String, link: String) = {
     <html>
       <head>
@@ -100,11 +102,11 @@ class Person extends MegaProtoUser[Person] with OneToMany[Long, Person] {
       S.hostAndPath + Person.editPath.mkString("/", "/", "")))
   }
 
-  def mailMe(msgXml: Elem): Unit = {
+  def mailMe(xhtml: NodeSeq): Unit = {
     Mailer.sendMail(
       From(Person.emailFrom),
-      Subject(S.?("new.member.confirmation")),
-      (To(email) :: xmlToMailBodyType(msgXml) :: (Person.bccEmail.toList.map(BCC(_)))): _*)
+      Subject((xhtml \\ "title").text.trim),
+      (To(email) :: xmlToMailBodyType(xhtml) :: (Person.bccEmail.toList.map(BCC(_)))): _*)
   }
 
   def confirmationLink = S.hostAndPath + Person.newMemberConfirmationPath.mkString("/", "/", "/") + uniqueId
@@ -116,19 +118,30 @@ class Person extends MegaProtoUser[Person] with OneToMany[Long, Person] {
       confirmationLink))
   }
 
-  def sendSubscriptionsReceivedEmail {
-    val subscriptionLink = (S.hostAndPath :: Membership.membershipsPath :: Nil).mkString("/")
-    mailMe(javaBinMailBody(
-      S.?("new.subscriptions.received"),
-      S.?("new.subscriptions.received.body"),
-      subscriptionLink))
+  def sendMembershipsReceivedEmail {
+    val membershipLink = (S.hostAndPath :: Membership.membershipsPath :: Nil).mkString("/")
+    mailMe(bind("info", template("mail-memberships-received-old-user"),
+      "boughtBy" -> shortName,
+      "footer" -> javaBinStandardGreeting,
+      "memberships" -> <a href={membershipLink}>{membershipLink}</a>));
   }
 
-  def sendSubscriptionsReceivedAndUserCreateEmail {
-    mailMe(javaBinMailBody(
-      S.?("new.subscriptions.received.and.user.created"),
-      S.?("new.subscriptions.received.and.user.created.body"),
-      confirmationLink))
+  def sendMembershipsReceivedAndUserCreateEmail {
+    mailMe(bind("info", template("mail-memberships-received-new-user"),
+      "boughtBy" -> shortName,
+      "footer" -> javaBinStandardGreeting,
+      "userVerification" -> <a href={confirmationLink}>{confirmationLink}</a>))
   }
+
+  def javaBinStandardGreeting: NodeSeq =
+    (<p>
+      Med vennlig hilsen<br/>
+      javaBin
+    </p>
+    <p>
+      Kontaktinfo:<br/>
+      portal@java.no<br/>
+      www.java.no
+    </p>)
 
 }
