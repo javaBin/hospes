@@ -56,6 +56,17 @@ object Person extends Person with MetaMegaProtoUser[Person] {
   override def changePasswordXhtml = super.changePasswordXhtml % ("class" -> "lift-form")
   override def lostPasswordXhtml = super.lostPasswordXhtml % ("class" -> "lift-form")
   override def passwordResetXhtml = super.passwordResetXhtml % ("class" -> "lift-form")
+
+  def javaBinStandardGreeting: NodeSeq =
+    (<p>
+      Med vennlig hilsen<br/>
+      javaBin
+    </p>
+    <p>
+      Kontaktinfo:<br/>
+      portal@java.no<br/>
+      www.java.no
+    </p>)
 }
 
 class Person extends MegaProtoUser[Person] with OneToMany[Long, Person] {
@@ -83,7 +94,7 @@ class Person extends MegaProtoUser[Person] with OneToMany[Long, Person] {
     mailMe(bind("info", template("mail-membership-assigned-old-user"),
       "member" -> shortName,
       "boughtBy" -> other.shortName,
-      "footer" -> javaBinStandardGreeting,
+      "footer" -> Person.javaBinStandardGreeting,
       "userEditLink" -> <a target="_blank" href={editPath}>{editPath}</a>))
   }
 
@@ -99,7 +110,7 @@ class Person extends MegaProtoUser[Person] with OneToMany[Long, Person] {
   def sendNewMemberConfirmationEmail(other: Person) {
     mailMe(bind("info", template("mail-membership-assigned-new-user"),
       "boughtBy" -> other.shortName,
-      "footer" -> javaBinStandardGreeting,
+      "footer" -> Person.javaBinStandardGreeting,
       "userVerification" -> confirmationLink))
   }
 
@@ -107,26 +118,15 @@ class Person extends MegaProtoUser[Person] with OneToMany[Long, Person] {
     val membershipLink = (S.hostAndPath :: Membership.membershipsPath :: Nil).mkString("/")
     mailMe(bind("info", template("mail-memberships-received-old-user"),
       "boughtBy" -> shortName,
-      "footer" -> javaBinStandardGreeting,
+      "footer" -> Person.javaBinStandardGreeting,
       "memberships" -> <a target="_blank" href={membershipLink}>{membershipLink}</a>));
   }
 
   def sendMembershipsReceivedAndUserCreateEmail {
     mailMe(bind("info", template("mail-memberships-received-new-user"),
       "boughtBy" -> shortName,
-      "footer" -> javaBinStandardGreeting,
+      "footer" -> Person.javaBinStandardGreeting,
       "userVerification" -> <a target="_blank" href={confirmationLink}>{confirmationLink}</a>))
   }
-
-  def javaBinStandardGreeting: NodeSeq =
-    (<p>
-      Med vennlig hilsen<br/>
-      javaBin
-    </p>
-    <p>
-      Kontaktinfo:<br/>
-      portal@java.no<br/>
-      www.java.no
-    </p>)
 
 }
