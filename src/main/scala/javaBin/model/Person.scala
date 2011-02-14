@@ -55,6 +55,7 @@ object Person extends Person with MetaMegaProtoUser[Person] {
   override def editXhtml(user: Person) = super.editXhtml(user) % ("class" -> "lift-form")
   override def changePasswordXhtml = super.changePasswordXhtml % ("class" -> "lift-form")
   override def lostPasswordXhtml = super.lostPasswordXhtml % ("class" -> "lift-form")
+  override def passwordResetXhtml = super.passwordResetXhtml % ("class" -> "lift-form")
 }
 
 class Person extends MegaProtoUser[Person] with OneToMany[Long, Person] {
@@ -77,29 +78,13 @@ class Person extends MegaProtoUser[Person] with OneToMany[Long, Person] {
 
   def template(name: String): NodeSeq = TemplateFinder.findAnyTemplate(List("templates-hidden", name)).open_!
 
-  def javaBinMailBody(title: String, body: String, link: String) = {
-    <html>
-      <head>
-        <title>{title}</title>
-      </head>
-      <body>
-        <p>{S.?("dear")} {mostPresentableName}, <br/>
-            <br/>
-          {body}<br/>
-            <br/>
-          <a href={link}>{link}</a> <br/>
-            <br/>
-          {S.?("thank.you")}
-        </p>
-      </body>
-    </html>
-  }
-
   def sendMembershipRenewedConfirmationEmail(other: Person) {
-    mailMe(javaBinMailBody(
-      S.?("membership.renewed"),
-      S.?("membership.renewed.body", other.mostPresentableName),
-      S.hostAndPath + Person.editPath.mkString("/", "/", "")))
+    var editPath = S.hostAndPath + Person.editPath.mkString("/", "/", "")
+    mailMe(bind("info", template("mail-membership-assigned-old-user"),
+      "member" -> shortName,
+      "boughtBy" -> other.shortName,
+      "footer" -> javaBinStandardGreeting,
+      "userEditLink" -> <a target="_blank" href={editPath}>{editPath}</a>))
   }
 
   def mailMe(xhtml: NodeSeq): Unit = {
@@ -112,10 +97,10 @@ class Person extends MegaProtoUser[Person] with OneToMany[Long, Person] {
   def confirmationLink = S.hostAndPath + Person.newMemberConfirmationPath.mkString("/", "/", "/") + uniqueId
 
   def sendNewMemberConfirmationEmail(other: Person) {
-    mailMe(javaBinMailBody(
-      S.?("new.member.confirmation"),
-      S.?("click.new.member.confirmation.link", other.mostPresentableName),
-      confirmationLink))
+    mailMe(bind("info", template("mail-membership-assigned-new-user"),
+      "boughtBy" -> other.shortName,
+      "footer" -> javaBinStandardGreeting,
+      "userVerification" -> confirmationLink))
   }
 
   def sendMembershipsReceivedEmail {
@@ -123,14 +108,14 @@ class Person extends MegaProtoUser[Person] with OneToMany[Long, Person] {
     mailMe(bind("info", template("mail-memberships-received-old-user"),
       "boughtBy" -> shortName,
       "footer" -> javaBinStandardGreeting,
-      "memberships" -> <a href={membershipLink}>{membershipLink}</a>));
+      "memberships" -> <a target="_blank" href={membershipLink}>{membershipLink}</a>));
   }
 
   def sendMembershipsReceivedAndUserCreateEmail {
     mailMe(bind("info", template("mail-memberships-received-new-user"),
       "boughtBy" -> shortName,
       "footer" -> javaBinStandardGreeting,
-      "userVerification" -> <a href={confirmationLink}>{confirmationLink}</a>))
+      "userVerification" -> <a target="_blank" href={confirmationLink}>{confirmationLink}</a>))
   }
 
   def javaBinStandardGreeting: NodeSeq =
