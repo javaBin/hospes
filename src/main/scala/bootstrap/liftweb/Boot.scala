@@ -10,6 +10,7 @@ import net.liftweb.mapper.{Schemifier, DB, StandardDBVendor, DefaultConnectionId
 import net.liftweb.sitemap.{SiteMap, Menu}
 import net.liftweb.util.{Mailer, Props}
 import net.liftweb.common.{Empty, Full}
+import java.io.{FileInputStream, File}
 
 class Boot {
 
@@ -40,8 +41,8 @@ class Boot {
 
   def restAuthenticationSetup: Unit = {
     val systemRole = AuthRole("system")
-    val webshopUser = Props.get("webshop.user").openOr("webshop")
-    val webshopPwd = Props.get("webshop.password").openOr("webschopp")
+    val webshopUser = Props.get("webshop.user").open_!
+    val webshopPwd = Props.get("webshop.password").open_!
 
     LiftRules.authentication = HttpBasicAuthentication("lift") {
       case (`webshopUser`, `webshopPwd`, _) =>
@@ -56,26 +57,25 @@ class Boot {
   }
 
   def setupEmail: Unit = {
-    //System.setProperty("mail.smtp.starttls.enable","true");
-    (for {host <- Props.get("mail.smtp.host")
-          port <- Props.get("mail.smtp.port")
-    } yield {
-      System.setProperty("mail.smtp.host", "smtp.domeneshop.no")
-      System.setProperty("mail.smtp.port", "587")
-      val auth = (
-              for {userName <- Props.get("mail.smtp.username")
-                   password <- Props.get("mail.smtp.password")
-              } yield {
-                Mailer.authenticator = Full(new Authenticator {
-                  override def getPasswordAuthentication = new PasswordAuthentication(userName, password)
-                })
-                true
-              }).openOr(false)
-      System.setProperty("mail.smtp.auth", auth.toString)
-    }).openOr(error("Mail is not set up correctly"))
+    System.setProperty("mail.smtp.host", Props.get("mail.smtp.host").open_!)
+    System.setProperty("mail.smtp.port", Props.get("mail.smtp.port").open_!)
+    val auth =
+      for {userName <- Props.get("mail.smtp.username")
+           password <- Props.get("mail.smtp.password")
+      } yield new Authenticator {
+        override def getPasswordAuthentication = new PasswordAuthentication(userName, password)
+      }
+    Mailer.authenticator = auth
+    System.setProperty("mail.smtp.auth", auth.isDefined.toString)
   }
 
   def boot {
+    val localFile = () => {
+      val file = new File("/opt/jb/hospes/etc/hospes.props")
+      if (file.exists) Full(new FileInputStream(file)) else Empty
+    }
+    Props.whereToLook = () => (("local", localFile) :: Nil)
+
     Locale.setDefault(new Locale("nb", "NO"))
 
     // Needed to get right encoding on subject of mail (and probably other non-xhtml fields)

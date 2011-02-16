@@ -7,3 +7,6 @@ db.url=jdbc:postgresql:hospes
 db.driver=org.postgresql.Driver
 db.user=hospes
 db.password=
+
+webshop.user=webshop
+webshop.password=webschopp

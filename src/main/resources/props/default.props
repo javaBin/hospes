@@ -4,3 +4,6 @@ mail.smtp.host=smtp.domeneshop.no
 mail.smtp.port=587
 mail.smtp.username=eventsystems5
 mail.smtp.password=VvM8TKJB
+
+webshop.user=webshop
+webshop.password=webschopp
