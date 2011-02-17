@@ -17,6 +17,8 @@ class Project(info: ProjectInfo) extends DefaultWebProject(info) {
   val jodaTime     = "joda-time" % "joda-time" % "1.6.2" withSources
   val h2           = "com.h2database" % "h2" % "1.2.138" withSources
   val postgresql   = "postgresql" % "postgresql" % "8.4-702.jdbc3" withSources
+  val slf4j        = "org.slf4j" % "slf4j-log4j12" % "1.6.1" withSources
+  val log4j        = "log4j" % "log4j" % "1.2.16" withSources
 
   val jettyTest    = "org.mortbay.jetty" % "jetty" % "6.1.22" % "test" withSources
   val specs        = "org.scala-tools.testing" %% "specs" % "1.6.7" % "test" withSources

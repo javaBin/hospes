@@ -8,9 +8,9 @@ import net.liftweb.http._
 import auth.{userRoles, HttpBasicAuthentication, AuthRole}
 import net.liftweb.mapper.{Schemifier, DB, StandardDBVendor, DefaultConnectionIdentifier}
 import net.liftweb.sitemap.{SiteMap, Menu}
-import net.liftweb.util.{Mailer, Props}
-import net.liftweb.common.{Empty, Full}
 import java.io.{FileInputStream, File}
+import net.liftweb.common.{Logger, Empty, Full}
+import net.liftweb.util.{LoggingAutoConfigurer, Mailer, Props}
 
 class Boot {
 
@@ -70,6 +70,8 @@ class Boot {
   }
 
   def boot {
+    Logger.setup = Full(LoggingAutoConfigurer())
+
     val localFile = () => {
       val file = new File("/opt/jb/hospes/etc/hospes.props")
       if (file.exists) Full(new FileInputStream(file)) else Empty
