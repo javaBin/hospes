@@ -5,7 +5,6 @@ import xml.{Node, Elem}
 /**
  * @author Thor Åge Eldby (thoraageeldby@gmail.com)
  */
-
 object XMLUtil {
 
   implicit def createElemWrapper(elem: Elem): ElemWrapper = new ElemWrapper(elem)
@@ -17,5 +16,4 @@ object XMLUtil {
       case _ => error("Can only add children to elements!")
     }
   }
-
 }

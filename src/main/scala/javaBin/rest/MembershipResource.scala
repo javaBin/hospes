@@ -3,13 +3,13 @@ package rest
 
 import model.{Membership, Person}
 
+import net.liftweb.common._
 import net.liftweb.http.rest.RestHelper
 import net.liftweb.http._
 import net.liftweb.json.{JsonParser, JsonAST, JsonDSL}
-import JsonAST._
-import JsonDSL._
+import net.liftweb.json.JsonAST._
+import net.liftweb.json.JsonDSL._
 import net.liftweb.mapper.{MappedEmail, By}
-import net.liftweb.common._
 
 import dispatch.Http
 

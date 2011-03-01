@@ -1,6 +1,6 @@
 import sbt._
 
-class Project(info: ProjectInfo) extends DefaultWebProject(info) {
+class Project(info: ProjectInfo) extends DefaultWebProject(info) with IdeaProject {
 
   def lift(module:String) = "net.liftweb" %% ("lift-" + module) % "2.2" withSources()
 
@@ -23,7 +23,7 @@ class Project(info: ProjectInfo) extends DefaultWebProject(info) {
   val jettyTest    = "org.mortbay.jetty" % "jetty" % "6.1.22" % "test" withSources
   val specs        = "org.scala-tools.testing" %% "specs" % "1.6.7" % "test" withSources
 
-  override def jettyPort = 8090
+  override def jettyPort = 8105
   override def scanDirectories = Nil
   override def jettyWebappPath = webappPath
 }

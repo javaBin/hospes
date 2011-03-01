@@ -81,5 +81,4 @@ class Memberships {
         </span>
     }.openOr(error("User not available"))
   }
-
 }

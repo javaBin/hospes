@@ -2,6 +2,8 @@ mail.from=staging@java.no
 
 mail.smtp.host=localhost
 mail.smtp.port=25
+#mail.smtp.username=
+#mail.smtp.password=
 
 db.url=jdbc:postgresql:hospes
 db.driver=org.postgresql.Driver

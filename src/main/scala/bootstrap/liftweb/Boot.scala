@@ -1,14 +1,14 @@
 package bootstrap.liftweb
 
 import java.util.Locale
+import java.io.{FileInputStream, File}
 import javaBin.model._
 import javaBin.rest.MembershipResource
 import javax.mail.{PasswordAuthentication, Authenticator}
 import net.liftweb.http._
-import auth.{userRoles, HttpBasicAuthentication, AuthRole}
+import net.liftweb.http.auth.{userRoles, HttpBasicAuthentication, AuthRole}
 import net.liftweb.mapper.{Schemifier, DB, StandardDBVendor, DefaultConnectionIdentifier}
 import net.liftweb.sitemap.{SiteMap, Menu}
-import java.io.{FileInputStream, File}
 import net.liftweb.common.{Logger, Empty, Full}
 import net.liftweb.util.{LoggingAutoConfigurer, Mailer, Props}
 
@@ -58,12 +58,13 @@ class Boot {
 
   def setupEmail: Unit = {
     System.setProperty("mail.smtp.host", Props.get("mail.smtp.host").open_!)
-    System.setProperty("mail.smtp.port", Props.get("mail.smtp.port").open_!)
+    System.setProperty("mail.smtp.port", Props.get("mail.smtp.port").openOr("25"))
     val auth =
-      for {userName <- Props.get("mail.smtp.username")
-           password <- Props.get("mail.smtp.password")
+      for {
+        username <- Props.get("mail.smtp.username")
+        password <- Props.get("mail.smtp.password")
       } yield new Authenticator {
-        override def getPasswordAuthentication = new PasswordAuthentication(userName, password)
+        override def getPasswordAuthentication = new PasswordAuthentication(username, password)
       }
     Mailer.authenticator = auth
     System.setProperty("mail.smtp.auth", auth.isDefined.toString)

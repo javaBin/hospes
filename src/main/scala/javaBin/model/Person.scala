@@ -51,11 +51,24 @@ object Person extends Person with MetaMegaProtoUser[Person] {
   override def emailFrom = Props.get("mail.from", super.emailFrom)
 
   override def loginXhtml = super.loginXhtml % ("class" -> "lift-form")
-  override def signupXhtml(user: Person) = super.signupXhtml(user) % ("class" -> "lift-form")
   override def editXhtml(user: Person) = super.editXhtml(user) % ("class" -> "lift-form")
   override def changePasswordXhtml = super.changePasswordXhtml % ("class" -> "lift-form")
   override def lostPasswordXhtml = super.lostPasswordXhtml % ("class" -> "lift-form")
   override def passwordResetXhtml = super.passwordResetXhtml % ("class" -> "lift-form")
+
+  override def signupXhtml(user: Person) =
+    <div>
+      <h2>{S.??("sign.up")}</h2>
+      <form method="post" action={S.uri}>
+        <table>
+          {localForm(user, false, signupFields)}
+          <tr>
+            <td>&nbsp;</td>
+            <td><user:submit/></td>
+          </tr>
+        </table>
+      </form>
+    </div>
 
   def javaBinStandardGreeting: NodeSeq =
     (<p>
@@ -90,7 +103,7 @@ class Person extends MegaProtoUser[Person] with OneToMany[Long, Person] {
   def template(name: String): NodeSeq = TemplateFinder.findAnyTemplate(List("templates-hidden", name)).open_!
 
   def sendMembershipRenewedConfirmationEmail(other: Person) {
-    var editPath = S.hostAndPath + Person.editPath.mkString("/", "/", "")
+    val editPath = S.hostAndPath + Person.editPath.mkString("/", "/", "")
     mailMe(bind("info", template("mail-membership-assigned-old-user"),
       "member" -> shortName,
       "boughtBy" -> other.shortName,
@@ -128,5 +141,4 @@ class Person extends MegaProtoUser[Person] with OneToMany[Long, Person] {
       "footer" -> Person.javaBinStandardGreeting,
       "userVerification" -> <a target="_blank" href={confirmationLink}>{confirmationLink}</a>))
   }
-
 }

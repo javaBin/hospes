@@ -16,5 +16,4 @@ class UserInformation {
       Text(S.?("user.not.logged.in")) ++
       <br/><a href={Person.loginPath.mkString("/", "/", "")}><lift:loc.login/></a>
     }
-
 }
