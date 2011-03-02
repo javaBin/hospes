@@ -2,6 +2,7 @@ package bootstrap.liftweb
 
 import java.util.Locale
 import java.io.{FileInputStream, File}
+import javaBin.OpenIdIntegration
 import javaBin.model._
 import javaBin.rest.MembershipResource
 import javax.mail.{PasswordAuthentication, Authenticator}
@@ -48,10 +49,9 @@ class Boot {
       case (`webshopUser`, `webshopPwd`, _) =>
         userRoles(systemRole :: Nil)
         true
-
     }
 
-    LiftRules.httpAuthProtectedResource.append{
+    LiftRules.httpAuthProtectedResource.append {
       case Req("rest" :: _, _, _) => Full(systemRole)
     }
   }
@@ -118,6 +118,9 @@ class Boot {
     LiftRules.ajaxEnd = Full(() => LiftRules.jsArtifacts.hide("ajax-loader").cmd)
 
     LiftRules.loggedInTest = Full(() => Person.loggedIn_?)
+
+    LiftRules.statelessDispatchTable.append(new OpenIdIntegration("http://localhost:8106").statelessDispatch())
+    LiftRules.dispatch.append(new OpenIdIntegration("http://localhost:8106").dispatch())
 
     S.addAround(DB.buildLoanWrapper)
   }

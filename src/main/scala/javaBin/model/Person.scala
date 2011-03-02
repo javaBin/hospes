@@ -16,9 +16,10 @@ object Person extends Person with MetaMegaProtoUser[Person] {
   val isMembershipOwner = If(() => Person.currentUser.map(user => user.thisYearsBoughtMemberships.size > 0).openOr(false), forbiddenResponse)
 
   override def dbTableName = "person"
-  override def screenWrap = Full(<lift:surround with="default" at="content">
-      <lift:bind/>
-  </lift:surround>)
+  override def screenWrap = Full(
+    <lift:surround with="default" at="content">
+        <lift:bind/>
+    </lift:surround>)
   override def signupFields = List(email, firstName, lastName, address, phoneNumber, password)
   override def editFields = signupFields
   override def fieldOrder = List(email, firstName, lastName, address, phoneNumber)
