@@ -9,7 +9,7 @@ import javax.mail.{PasswordAuthentication, Authenticator}
 import net.liftweb.http._
 import net.liftweb.http.auth.{userRoles, HttpBasicAuthentication, AuthRole}
 import net.liftweb.mapper.{Schemifier, DB, StandardDBVendor, DefaultConnectionIdentifier}
-import net.liftweb.sitemap.{SiteMap, Menu}
+import net.liftweb.sitemap.{SiteMap, Menu, Loc}
 import net.liftweb.common.{Logger, Empty, Full}
 import net.liftweb.util.{LoggingAutoConfigurer, Mailer, Props}
 
@@ -20,8 +20,8 @@ class Boot {
       personNumber =>
         val person = Person.create
         val personName = "Person" + personNumber
-        person.email(personName + "@lainternet.com")
-                .validated(true)
+        person.email("person" + personNumber + "@lainternet.com")
+                .validated(personNumber != 2)
                 .firstName(personName)
                 .lastName("Personson")
                 .password("passord")
@@ -105,6 +105,7 @@ class Boot {
 
     val entries =
       (Menu(S.?("home.menu.title")) / "index") ::
+      ((Menu("hidden") / "openid" / "form") >> Loc.Hidden) ::
       Person.sitemap :::
       (Menu(S.?("admin.menu.title")) / Membership.adminPath >> Person.loginFirst >> Person.isSuperUser) ::
       (Menu(S.?("memberships.menu.title")) / Membership.membershipsPath >> Person.loginFirst >> Person.isMembershipOwner) ::
@@ -119,7 +120,8 @@ class Boot {
 
     LiftRules.loggedInTest = Full(() => Person.loggedIn_?)
 
-    val openId = new OpenIdIntegration("http://localhost:8106")
+    // Must match the sitemap entry above
+    val openId = new OpenIdIntegration("http://localhost:8106", "/openid/form")
     LiftRules.statelessDispatchTable.append(openId.statelessDispatch())
     LiftRules.dispatch.append(openId.dispatch())
 

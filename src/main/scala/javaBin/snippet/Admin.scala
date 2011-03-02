@@ -6,7 +6,7 @@ import net.liftweb.http.{S, SHtml}
 import net.liftweb.http.js.JsCmds
 import javaBin.model.{Person, Membership}
 import net.liftweb.mapper.{By, MappedEmail}
-import net.liftweb.common.{Empty, Full, Failure}
+import net.liftweb.common.Empty
 
 class Admin {
   def createMemberships(template: NodeSeq): NodeSeq = {

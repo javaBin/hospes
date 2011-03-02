@@ -1,0 +1,34 @@
+<lift:surround with="default" at="content">
+  <lift:OpenId.login>
+    <h1>OpenId Login</h1>
+    <form action="/openid/form.html" method="POST" class="lift-form">
+      <table>
+        <tr>
+          <td>
+            <label for="email">Email</label>
+          </td>
+          <td>
+            <openid:email/>
+            <span id="emailError" class="field_error"/>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <label for="password">Password</label>
+          </td>
+          <td>
+            <input id="password" type="password" name="password"/>
+            <span id="passwordError" class="field_error"/>
+          </td>
+        </tr>
+        <tr>
+          <td>&nbsp;</td>
+          <td>
+            <input type="submit" value="Log in"/>
+          </td>
+        </tr>
+      </table>
+    </form>
+  </lift:OpenId.login>
+
+</lift:surround>

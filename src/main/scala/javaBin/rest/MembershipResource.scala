@@ -82,6 +82,7 @@ trait Extractors {
   class Limited(limit: Int) {
     def unapply[T <: Number](value: T): Option[T] = if (value.doubleValue < limit) Some(value) else None
   }
+
   object NotMoreThanThousand extends Limited(1000)
 
   object ValidEmailAddress {
