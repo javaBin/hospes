@@ -119,8 +119,9 @@ class Boot {
 
     LiftRules.loggedInTest = Full(() => Person.loggedIn_?)
 
-    LiftRules.statelessDispatchTable.append(new OpenIdIntegration("http://localhost:8106").statelessDispatch())
-    LiftRules.dispatch.append(new OpenIdIntegration("http://localhost:8106").dispatch())
+    val openId = new OpenIdIntegration("http://localhost:8106")
+    LiftRules.statelessDispatchTable.append(openId.statelessDispatch())
+    LiftRules.dispatch.append(openId.dispatch())
 
     S.addAround(DB.buildLoanWrapper)
   }
