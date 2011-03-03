@@ -23,11 +23,20 @@ class OpenId {
       println("error# " + S.errors.size)
       if (S.errors.isEmpty) {
         Person.find(By(Person.email, email)) match {
-          case Full(user) if !user.validated.is =>
-            S.error("Your account is not validated")
-          case Full(user) if user.validated.is && user.password.match_?(password) =>
-            Person.logUserIn(user)
-            S.redirectTo("/openid/retry-login")
+          // If the user exist and is authenticated through a password,
+          // we can reveal more information if login fails.
+          case Full(user: Person) if user.password.match_?(password) =>
+            println("user.openIdKey.get=" + user.openIdKey.get)
+            if(user.openIdKey.get == 0) {
+              S.error("Your account does not have an OpenID URL. Please contact drift@java.no.")
+            }
+            else if (!user.validated.is) {
+              S.error("Your account is not validated")
+            }
+            else {
+              Person.logUserIn(user)
+              S.redirectTo("/openid/retry-login")
+            }
           case _ =>
             S.error("Invalid mail or password")
         }

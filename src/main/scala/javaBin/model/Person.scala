@@ -4,11 +4,13 @@ import net.liftweb.mapper._
 import net.liftweb.common._
 import net.liftweb.sitemap.{Loc, Menu}
 import net.liftweb.sitemap.Loc._
-import net.liftweb.util.{Props, Mailer, Helpers}
-import Mailer._
-import Helpers._
+import net.liftweb.util.{Props, Mailer}
+import net.liftweb.util.Mailer._
+import net.liftweb.util.Helpers._
 import net.liftweb.http.{TemplateFinder, ForbiddenResponse, S}
-import xml.NodeSeq
+import scala.xml.NodeSeq
+import scala.util.Random
+import scala.math._
 
 object Person extends Person with MetaMegaProtoUser[Person] {
   private val forbiddenResponse = () => new ForbiddenResponse("No access")
@@ -30,9 +32,10 @@ object Person extends Person with MetaMegaProtoUser[Person] {
   lazy val newMemberConfirmationPath = thePath("new_member_confirmation")
   def newMemberConfirmation(id: String) = {
     find(By(uniqueId, id)) match {
-      case Full(user) =>
-        user.validated.set(true)
-        user.save
+      case Full(user: Person) =>
+        user.
+            setValidated(true).
+            save
       case _ =>
     }
     passwordReset(id)
@@ -71,8 +74,8 @@ object Person extends Person with MetaMegaProtoUser[Person] {
       </form>
     </div>
 
-  def javaBinStandardGreeting: NodeSeq =
-    (<p>
+  def javaBinStandardGreeting: NodeSeq = (
+    <p>
       Med vennlig hilsen<br/>
       javaBin
     </p>
@@ -91,9 +94,21 @@ class Person extends MegaProtoUser[Person] with OneToMany[Long, Person] {
   object address extends MappedText(this) {
     override def displayName = S.?("address")
   }
+  object openIdKey extends MappedLong(this) {
+  }
+
   def name = Seq(firstName, lastName).mkString(" ")
   def nameBox = if (firstName.get.isEmpty && lastName.get.isEmpty) Empty else Full(name)
   def mostPresentableName = nameBox.openOr(email.get)
+
+  // TODO: Why doesn't this override proto.ProtoUser.setValidated?
+  def setValidated(validated: Boolean): Person = {
+    if(validated && !this.validated) {
+      openIdKey(abs(Random.nextLong))
+    }
+    this.validated(validated)
+  }
+
   def thisYearsBoughtMemberships =
     Membership.findAll(
       By(Membership.boughtBy, this.id),

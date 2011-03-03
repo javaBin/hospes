@@ -13,11 +13,16 @@ import org.openid4java.message.sreg.{SRegResponse, SRegRequest, SRegMessage}
 
 object currentOpenIdRequest extends SessionVar[Option[ParameterList]](None)
 
-class OpenIdIntegration(endpointUrl: String, loginFormUrl: String) {
+class OpenIdIntegration(endpointUrl: => String, loginUrl: => String, loginFormUrl: => String, openIdUrl: (Long) => String) {
+  // This has to match the patterns as it should be used to build the endpoint and openIdUrls
+  val xrdsPath = "/openid/id"
+
   /**
    * @see http://openid.net/specs/openid-authentication-1_1.html#anchor32
    */
-  val contentType = ("Content-Type", "text/plain;charset=utf-8")
+  private val plainText = ("Content-Type", "text/plain;charset=utf-8")
+
+  private val xrds = ("Content-Type", "application/xrds+xml")
 
   val manager = new ServerManager() {
     setOPEndpointUrl(endpointUrl);
@@ -29,29 +34,36 @@ class OpenIdIntegration(endpointUrl: String, loginFormUrl: String) {
   def processCheckidSetup(person: Person, request: ParameterList): Box[LiftResponse] = {
     val authReq = AuthRequest.createAuthRequest(request, manager.getRealmVerifier())
 
+    val openIdUrl = this.openIdUrl(person.openIdKey.get)
     println("AuthReq")
-    println("OPEndpoint =" + authReq.getOPEndpoint())
-    println("Identity   =" + authReq.getIdentity())
-    println("Claimed    =" + authReq.getClaimed())
-    println("Handle     =" + authReq.getHandle())
-    println("ReturnTo   =" + authReq.getReturnTo())
-    println("Realm      =" + authReq.getRealm())
+    println("OPEndpoint = " + authReq.getOPEndpoint())
+    println("Identity   = " + authReq.getIdentity())
+    println("Claimed    = " + authReq.getClaimed())
+    println("Handle     = " + authReq.getHandle())
+    println("ReturnTo   = " + authReq.getReturnTo())
+    println("Realm      = " + authReq.getRealm())
 
-    val userSelectedClaimedId: String = null
-    val opLocalId: String = null
+    println("OpenID URL = " + openIdUrl)
+
+    val userSelClaimed: String = openIdUrl
+    val userSelId: String = openIdUrl
+
     // if the user chose a different claimed_id than the one in request
-    if (userSelectedClaimedId != null && userSelectedClaimedId.equals(authReq.getClaimed())) {
-      //opLocalId = lookupLocalId(userSelectedClaimedId);
-    }
+//    if (userSelClaimed != null && userSelClaimed.equals(authReq.getClaimed())) {
+//      userSelId = person.openIdUrl.get
+//    }
 
     val response = manager.authResponse(request,
-      opLocalId,
-      userSelectedClaimedId,
+      userSelId,
+      userSelClaimed,
       true,
       false);
 
     if (response.isInstanceOf[DirectError]) {
-      return Full(InMemoryResponse(response.asInstanceOf[DirectError].keyValueFormEncoding.getBytes("utf-8"), Nil, Nil, 200))
+      val s = response.asInstanceOf[DirectError].keyValueFormEncoding
+      println("result")
+      println(s)
+      return Full(InMemoryResponse(s.getBytes("utf-8"), Nil, Nil, 200))
     }
 
     if (authReq.hasExtension(AxMessage.OPENID_NS_AX)) {
@@ -103,7 +115,10 @@ class OpenIdIntegration(endpointUrl: String, loginFormUrl: String) {
     // caller will need to decide which of the following to use:
 
     // option1: GET HTTP-redirect to the return_to URL
-    Full(RedirectResponse(response.getDestinationUrl(true)))
+    val url = response.getDestinationUrl(true)
+    println("result")
+    println(url)
+    Full(RedirectResponse(url))
 
     // option2: HTML FORM Redirection
     //RequestDispatcher dispatcher =
@@ -119,26 +134,36 @@ class OpenIdIntegration(endpointUrl: String, loginFormUrl: String) {
     new ParameterList(parameterMap)
   }
 
+  val generateXrds: Node =
+    <xrds:XRDS xmlns:xrds="xri://$xrds" xmlns:openid="http://openid.net/xmlns/1.0" xmlns="xri://$xrd*($v*2.0)">
+      <XRD>
+        <Service priority="0">
+          <Type>http://openid.net/signon/1.0</Type>
+          <URI>{loginUrl}</URI>
+        </Service>
+      </XRD>
+    </xrds:XRDS>
+
   def statelessDispatch(): LiftRules.DispatchPF = {
     // To be HTTP compliant return 200 OK on a HEAD request
-    case req@Req(List("openid", "id"), _, HeadRequest) => () =>
-      Full(InMemoryResponse(Array(), Nil, Nil, 200))
-    case req@Req(List("openid", "id"), _, GetRequest) => () =>
-      def generateXrds(url: String): Node =
-        <xrds:XRDS xmlns:xrds="xri://$xrds" xmlns:openid="http://openid.net/xmlns/1.0" xmlns="xri://$xrd*($v*2.0)">
-          <XRD>
-            <Service priority="0">
-              <Type>http://openid.net/signon/1.0</Type>
-              <URI>{url}</URI>
-            </Service>
-          </XRD>
-        </xrds:XRDS>
-
-      val response = for {
-          url <- Some(req.hostAndPath) if !url.equals("")
-          xml = generateXrds(url + "/openid/login")
-        } yield InMemoryResponse(xml.toString.getBytes("utf-8"), List(("Content-Type", "application/xrds+xml")), Nil, 200)
-      Full(response.getOrElse(InternalServerErrorResponse()))
+    case req@Req(List("openid", "id"), "", method) => () => method match {
+      case HeadRequest =>
+        Full(InMemoryResponse(Array(), Nil, Nil, 200))
+      case GetRequest =>
+        val xml = generateXrds
+        Full(InMemoryResponse(xml.toString.getBytes("utf-8"), List(xrds), Nil, 200))
+      case _ =>
+        Full(MethodNotAllowedResponse())
+    }
+    case req@Req(List("openid", "id", key), "", method) => () => method match {
+      case HeadRequest =>
+        Full(OkResponse())
+      case GetRequest =>
+        val xml = generateXrds
+        Full(InMemoryResponse(xml.toString.getBytes("utf-8"), List(xrds), Nil, 200))
+      case _ =>
+        Full(MethodNotAllowedResponse())
+    }
   }
 
   def openidMode(req: Req, mode: String): Boolean = {
@@ -146,21 +171,22 @@ class OpenIdIntegration(endpointUrl: String, loginFormUrl: String) {
   }
 
   def dispatch(): LiftRules.DispatchPF = {
-    case req@Req(List("openid", "login"), _, PostRequest) if openidMode(req, "associate") => () =>
+    case req@Req(List("openid", "login"), "", PostRequest) if openidMode(req, "associate") => () =>
       println("openid/login: openid.mode=associate")
       val result = manager.associationResponse(req).keyValueFormEncoding()
       println("openid/login: openid.mode=associate. Result:")
       println(result)
       Full(InMemoryResponse(result.getBytes("utf-8"), Nil, Nil, 200))
 
-    case req@Req(List("openid", "login"), _, PostRequest) if openidMode(req, "check_authentication") => () =>
+    case req@Req(List("openid", "login"), "", PostRequest) if openidMode(req, "check_authentication") => () =>
       println("openid/login: openid.mode=check_authentication")
       val s = manager.verify(req).keyValueFormEncoding()
       println("openid/login: openid.mode=check_authentication. result:")
       println(s)
       Full(InMemoryResponse(s.getBytes("utf-8"), Nil, Nil, 200))
 
-    case req@Req(List("openid", "login"), _, GetRequest) if openidMode(req, "checkid_setup") => () =>
+    case req@Req(List("openid", "login"), fuck, GetRequest) if openidMode(req, "checkid_setup") => () =>
+      println("fuck=" + fuck)
       Person.currentUser match {
         case Full(person) =>
           println("openid/login: openid.mode=checkid_setup. logged in=true")
@@ -172,18 +198,20 @@ class OpenIdIntegration(endpointUrl: String, loginFormUrl: String) {
           currentOpenIdRequest.set(Some(req))
 
           // And redirect to our login form
-          Full(RedirectResponse(req.contextPath + loginFormUrl))
+          println("loginFormUrl=" + loginFormUrl)
+          Full(RedirectResponse(loginFormUrl))
       }
 
-    case req@Req(List("openid", "login"), _, method) => () =>
+    case req@Req(List("openid", "login"), fuck, method) => () =>
+      println("fuck=" + fuck)
       println("openid/login: Unknown request: openid.mode=" + req.param("openid.mode").openOr("") + ", method=" + method.method)
-      Full(NotFoundResponse())
+      Full(MethodNotAllowedResponse())
 
     // This is where the form login redirects the user
     // Do not allow query parameters
     case req@Req(List("openid", "retry-login"), "", GetRequest) if req.request.queryString.isEmpty => () =>
       Person.currentUser match {
-        case Full(person) =>
+        case Full(person) if person.openIdKey.get != 0 =>
           currentOpenIdRequest.get match {
             case Some(req) =>
               println("openid/retry-login: logged in=true, current openid request=true")
@@ -199,12 +227,16 @@ class OpenIdIntegration(endpointUrl: String, loginFormUrl: String) {
           currentOpenIdRequest.set(Some(req))
 
           // And redirect to our login form
-          Full(RedirectResponse(req.contextPath + loginFormUrl))
+          Full(RedirectResponse(loginFormUrl))
       }
+
+    case req@Req(List("openid", "retry-login"), "", method) => () =>
+      println("openid/retry-login: Unknown request: method=" + method.method)
+      Full(MethodNotAllowedResponse())
   }
 
   def missingOpenIdSession() = {
     val msg = "No active OpenId session. Please go back to the application came from and try again."
-    Full(InMemoryResponse(msg.getBytes("utf-8"), List(contentType), Nil, 404))
+    Full(InMemoryResponse(msg.getBytes("utf-8"), List(plainText), Nil, 404))
   }
 }

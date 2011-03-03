@@ -21,17 +21,18 @@ class Boot {
         val person = Person.create
         val personName = "Person" + personNumber
         person.email("person" + personNumber + "@lainternet.com")
-                .validated(personNumber != 2)
-                .firstName(personName)
-                .lastName("Personson")
-                .password("passord")
-                .superUser(personNumber == 1).save
+            .firstName(personName)
+            .lastName("Personson")
+            .password("passord")
+            .superUser(personNumber == 1)
+            .setValidated(personNumber != 2)
+            .save
         if (personNumber == 0 || personNumber == 1) {
-          (0 to 10).foreach{
+          (0 to 10).foreach {
             index =>
               val membership = Membership.create
               membership.year(if (personNumber == 0) 2011 else 2010).boughtBy(person.id)
-              if(personNumber == 0 && index == 0)
+              if (personNumber == 0 && index == 0)
                 membership.member(person.id)
               membership.save
           }
@@ -120,8 +121,9 @@ class Boot {
 
     LiftRules.loggedInTest = Full(() => Person.loggedIn_?)
 
-    // Must match the sitemap entry above
-    val openId = new OpenIdIntegration("http://localhost:8106", "/openid/form")
+    // The loginFormUrl must match the openid form entry above
+    val baseUrl = "http://localhost:8105"
+    val openId = new OpenIdIntegration(baseUrl + "/openid/id", baseUrl +"/openid/login", baseUrl +"/openid/form", (key: Long) => baseUrl + "/openid/id/" + key)
     LiftRules.statelessDispatchTable.append(openId.statelessDispatch())
     LiftRules.dispatch.append(openId.dispatch())
 
