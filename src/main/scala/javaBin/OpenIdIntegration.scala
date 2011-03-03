@@ -1,15 +1,16 @@
 package javaBin
 
-import java.util.HashMap
 import javaBin.model.Person
 import net.liftweb.common._
 import net.liftweb.http._
 import org.openid4java.message._
 import org.openid4java.message.ax._
+import org.openid4java.message.ax.FetchResponse._
+import org.openid4java.message.sreg._
+import org.openid4java.message.sreg.SRegResponse.createSRegResponse
 import org.openid4java.server.ServerManager
-import scala.collection.JavaConversions
+import scala.collection.JavaConversions._
 import scala.xml._
-import org.openid4java.message.sreg.{SRegResponse, SRegRequest, SRegMessage}
 
 object currentOpenIdRequest extends SessionVar[Option[ParameterList]](None)
 
@@ -25,10 +26,24 @@ class OpenIdIntegration(endpointUrl: => String, loginUrl: => String, loginFormUr
   private val xrds = ("Content-Type", "application/xrds+xml")
 
   val manager = new ServerManager() {
-    setOPEndpointUrl(endpointUrl);
+    setOPEndpointUrl(endpointUrl)
     // for a working demo, not enforcing RP realm discovery
     // since this new feature is not deployed
-    getRealmVerifier().setEnforceRpId(false);
+    getRealmVerifier().setEnforceRpId(false)
+  }
+
+  def getAttribute(person: Person)(t: (String, String)): (String, Option[String]) = t._2 match {
+    case "http://axschema.org/contact/email" =>
+      (t._1, Some(person.email.get).filter("" !=))
+    case "http://axschema.org/namePerson" =>
+      (t._1, for {
+        first <- Some(person.firstName.get).filter("" !=)
+        last <- Some(person.lastName.get).filter("" !=)
+      } yield (first + " " + last))
+    case "http://axschema.org/namePerson/first" =>
+      (t._1, Some(person.firstName.get).filter("" !=))
+    case "http://axschema.org/namePerson/last" =>
+      (t._1, Some(person.lastName.get).filter("" !=))
   }
 
   def processCheckidSetup(person: Person, request: ParameterList): Box[LiftResponse] = {
@@ -57,7 +72,7 @@ class OpenIdIntegration(endpointUrl: => String, loginUrl: => String, loginFormUr
       userSelId,
       userSelClaimed,
       true,
-      false);
+      false)
 
     if (response.isInstanceOf[DirectError]) {
       val s = response.asInstanceOf[DirectError].keyValueFormEncoding
@@ -67,44 +82,76 @@ class OpenIdIntegration(endpointUrl: => String, loginUrl: => String, loginFormUr
     }
 
     if (authReq.hasExtension(AxMessage.OPENID_NS_AX)) {
-      val ext = authReq.getExtension(AxMessage.OPENID_NS_AX);
+      val ext = authReq.getExtension(AxMessage.OPENID_NS_AX)
       if (ext.isInstanceOf[FetchRequest]) {
-        val fetchReq = ext.asInstanceOf[FetchRequest];
-        val required = fetchReq.getAttributes(true);
-        //Map optional = fetchReq.getAttributes(false);
-        if (required.containsKey("email")) {
-          val userDataExt = new HashMap();
-          //userDataExt.put("email", userData.get(3));
+        val req = ext.asInstanceOf[FetchRequest]
 
-          val fetchResp = FetchResponse.createFetchResponse(fetchReq, userDataExt);
-          // (alternatively) manually add attribute values
-//          fetchResp.addAttribute("email", "http://schema.openid.net/contact/email", email);
-          response.addExtension(fetchResp);
+        val requiredAttributes = asScalaMap(req.getAttributes(true).asInstanceOf[java.util.Map[String, String]])
+        val optionalAttributes = asScalaMap(req.getAttributes(false).asInstanceOf[java.util.Map[String, String]])
+
+        println("FetchRequest")
+        println("Required:")
+        println(requiredAttributes.map(_._1))
+        println("Optional:")
+        println(optionalAttributes.map(_._1))
+
+        val requiredValues = requiredAttributes.map(getAttribute(person))
+        val optionalValues = optionalAttributes.map(getAttribute(person))
+
+        println("Required values")
+        println(requiredValues)
+        println("Optional values")
+        println(optionalValues)
+
+        val missingRequiredValues = requiredValues.filter(_._2.isEmpty).map(_._1)
+        if(!missingRequiredValues.isEmpty) {
+          println("Missing required values: " + missingRequiredValues)
+          // TODO: figure out what to return here
         }
+
+        val v2 = requiredValues.map(t => (t._1, t._2.get)) ++
+              optionalValues.filter(_._2.isDefined).map(t => (t._1, t._2.get))
+        response.addExtension(createFetchResponse(req, asJavaMap(v2)))
       }
-      else
-        throw new UnsupportedOperationException("TODO");
+      else {
+        return Full(InternalServerErrorResponse())
+      }
     }
 
     if (authReq.hasExtension(SRegMessage.OPENID_NS_SREG)) {
       val ext = authReq.getExtension(SRegMessage.OPENID_NS_SREG);
       if (ext.isInstanceOf[SRegRequest]) {
-        val sregReq = ext.asInstanceOf[SRegRequest];
-        val required = sregReq.getAttributes(true);
-        //List optional = sregReq.getAttributes(false);
-        if (required.contains("email")) {
-          // data released by the user
-          val userDataSReg = new HashMap();
-          //userData.put("email", "user@example.com");
+        val req = ext.asInstanceOf[SRegRequest];
 
-          val sregResp = SRegResponse.createSRegResponse(sregReq, userDataSReg);
-          // (alternatively) manually add attribute values
-//          sregResp.addAttribute("email", email);
-          response.addExtension(sregResp);
+        val requiredAttributes = asScalaMap(req.getAttributes(true).asInstanceOf[java.util.Map[String, String]])
+        val optionalAttributes = asScalaMap(req.getAttributes(false).asInstanceOf[java.util.Map[String, String]])
+
+        println("SRegRequest")
+        println("Required:")
+        println(requiredAttributes.map(_._1))
+        println("Optional:")
+        println(optionalAttributes.map(_._1))
+
+        val requiredValues = requiredAttributes.map(getAttribute(person))
+        val optionalValues = optionalAttributes.map(getAttribute(person))
+
+        println("Required values")
+        println(requiredValues)
+        println("Optional values")
+        println(optionalValues)
+
+        val missingRequiredValues = requiredValues.filter(_._2.isEmpty).map(_._1)
+        if(!missingRequiredValues.isEmpty) {
+          println("Missing required values: " + missingRequiredValues)
+          // TODO: figure out what to return here
         }
+
+        val v2 = requiredValues.map(t => (t._1, t._2.get)) ++
+              optionalValues.filter(_._2.isDefined).map(t => (t._1, t._2.get))
+        response.addExtension(createSRegResponse(req, asJavaMap(v2)))
       }
       else {
-        throw new UnsupportedOperationException("TODO");
+        return Full(InternalServerErrorResponse())
       }
     }
 
@@ -112,25 +159,14 @@ class OpenIdIntegration(endpointUrl: => String, loginUrl: => String, loginFormUr
     // This is required as AuthSuccess.buildSignedList has a `todo' tag now.
     manager.sign(response.asInstanceOf[AuthSuccess]);
 
-    // caller will need to decide which of the following to use:
-
-    // option1: GET HTTP-redirect to the return_to URL
     val url = response.getDestinationUrl(true)
     println("result")
     println(url)
     Full(RedirectResponse(url))
-
-    // option2: HTML FORM Redirection
-    //RequestDispatcher dispatcher =
-    //        getServletContext().getRequestDispatcher("formredirection.jsp");
-    //httpReq.setAttribute("prameterMap", response.getParameterMap());
-    //httpReq.setAttribute("destinationUrl", response.getDestinationUrl(false));
-    //dispatcher.forward(request, response);
-    //return null;
   }
 
   implicit def reqToParameterList(req: Req): ParameterList = {
-    val parameterMap: java.util.Map[String, Array[String]] = JavaConversions.asJavaMap(req.params.map((t:(String, List[String])) => (t._1, t._2.toArray)))
+    val parameterMap: java.util.Map[String, Array[String]] = asJavaMap(req.params.map((t:(String, List[String])) => (t._1, t._2.toArray)))
     new ParameterList(parameterMap)
   }
 
@@ -139,6 +175,8 @@ class OpenIdIntegration(endpointUrl: => String, loginUrl: => String, loginFormUr
       <XRD>
         <Service priority="0">
           <Type>http://openid.net/signon/1.0</Type>
+          <Type>{AxMessage.OPENID_NS_AX}</Type>
+          <Type>{SRegMessage.OPENID_NS_SREG}</Type>
           <URI>{loginUrl}</URI>
         </Service>
       </XRD>
@@ -173,27 +211,33 @@ class OpenIdIntegration(endpointUrl: => String, loginUrl: => String, loginFormUr
   def dispatch(): LiftRules.DispatchPF = {
     case req@Req(List("openid", "login"), "", PostRequest) if openidMode(req, "associate") => () =>
       println("openid/login: openid.mode=associate")
-      val result = manager.associationResponse(req).keyValueFormEncoding()
+      val parameterList: ParameterList = req
+      println(parameterList)
+      val result = manager.associationResponse(parameterList).keyValueFormEncoding()
       println("openid/login: openid.mode=associate. Result:")
       println(result)
       Full(InMemoryResponse(result.getBytes("utf-8"), Nil, Nil, 200))
 
     case req@Req(List("openid", "login"), "", PostRequest) if openidMode(req, "check_authentication") => () =>
+      val parameterList: ParameterList = req
       println("openid/login: openid.mode=check_authentication")
-      val s = manager.verify(req).keyValueFormEncoding()
+      println(parameterList)
+      val s = manager.verify(parameterList).keyValueFormEncoding()
       println("openid/login: openid.mode=check_authentication. result:")
       println(s)
       Full(InMemoryResponse(s.getBytes("utf-8"), Nil, Nil, 200))
 
-    case req@Req(List("openid", "login"), fuck, GetRequest) if openidMode(req, "checkid_setup") => () =>
-      println("fuck=" + fuck)
+    case req@Req(List("openid", "login"), "", GetRequest) if openidMode(req, "checkid_setup") => () =>
+      val parameterList: ParameterList = req
       Person.currentUser match {
         case Full(person) =>
           println("openid/login: openid.mode=checkid_setup. logged in=true")
+          println(parameterList)
           currentOpenIdRequest.set(None)
           processCheckidSetup(person, req)
         case _ =>
           println("openid/login: openid.mode=checkid_setup. logged in=false")
+          println(parameterList)
           // Save the request for later
           currentOpenIdRequest.set(Some(req))
 
@@ -202,8 +246,7 @@ class OpenIdIntegration(endpointUrl: => String, loginUrl: => String, loginFormUr
           Full(RedirectResponse(loginFormUrl))
       }
 
-    case req@Req(List("openid", "login"), fuck, method) => () =>
-      println("fuck=" + fuck)
+    case req@Req(List("openid", "login"), "", method) => () =>
       println("openid/login: Unknown request: openid.mode=" + req.param("openid.mode").openOr("") + ", method=" + method.method)
       Full(MethodNotAllowedResponse())
 

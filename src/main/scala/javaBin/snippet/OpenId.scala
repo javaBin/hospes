@@ -20,13 +20,11 @@ class OpenId {
 
       // If everything is happy clappy, authenticate the user
 
-      println("error# " + S.errors.size)
       if (S.errors.isEmpty) {
         Person.find(By(Person.email, email)) match {
           // If the user exist and is authenticated through a password,
           // we can reveal more information if login fails.
           case Full(user: Person) if user.password.match_?(password) =>
-            println("user.openIdKey.get=" + user.openIdKey.get)
             if(user.openIdKey.get == 0) {
               S.error("Your account does not have an OpenID URL. Please contact drift@java.no.")
             }
