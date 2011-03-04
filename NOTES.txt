@@ -1,0 +1,99 @@
+Incogito Google SUCCESS:
+
+Created auth request:
+openid.assoc_handle:AOQobUevMNpxwAPqNSwjMDGj1UPwKQqrKmT3CGjd6PBSQSk4ytv3inbX83IBE1ecTcwEEfO5
+openid.claimed_id:http://specs.openid.net/auth/2.0/identifier_select
+openid.identity:http://specs.openid.net/auth/2.0/identifier_select
+openid.mode:checkid_setup
+openid.ns:http://specs.openid.net/auth/2.0
+openid.realm:http://localhost:8096/
+openid.return_to:http://localhost:8096/incogito/j_spring_openid_security_check
+
+Creating parameter list:
+openid.assoc_handle:AOQobUevMNpxwAPqNSwjMDGj1UPwKQqrKmT3CGjd6PBSQSk4ytv3inbX83IBE1ecTcwEEfO5
+openid.claimed_id:https://www.google.com/accounts/o8/id?id=AItOawld8cIL2kgag2dERedqNoCddGJ1hfGOXTc
+openid.ext1.mode:fetch_response
+openid.ext1.type.email:http://axschema.org/contact/email
+openid.ext1.value.email:javabin.portal@gmail.com
+openid.identity:https://www.google.com/accounts/o8/id?id=AItOawld8cIL2kgag2dERedqNoCddGJ1hfGOXTc
+openid.mode:id_res
+openid.ns.ext1:http://openid.net/srv/ax/1.0
+openid.ns:http://specs.openid.net/auth/2.0
+openid.op_endpoint:https://www.google.com/accounts/o8/ud
+openid.response_nonce:2011-03-04T13:20:51ZjPcWv0Ld7yqwwQ
+openid.return_to:http://localhost:8096/incogito/j_spring_openid_security_check
+openid.sig:DDCB27kitB0EBQoGw2EwwvQO+aDuwr5qRpzGX7Ny3aw=
+openid.signed:op_endpoint,claimed_id,identity,return_to,response_nonce,assoc_handle,ns.ext1,ext1.mode,ext1.type.email,ext1.value.email
+
+Created positive auth response:
+openid.assoc_handle:AOQobUevMNpxwAPqNSwjMDGj1UPwKQqrKmT3CGjd6PBSQSk4ytv3inbX83IBE1ecTcwEEfO5
+openid.claimed_id:https://www.google.com/accounts/o8/id?id=AItOawld8cIL2kgag2dERedqNoCddGJ1hfGOXTc
+openid.ext1.mode:fetch_response
+openid.ext1.type.email:http://axschema.org/contact/email
+openid.ext1.value.email:javabin.portal@gmail.com
+openid.identity:https://www.google.com/accounts/o8/id?id=AItOawld8cIL2kgag2dERedqNoCddGJ1hfGOXTc
+openid.mode:id_res
+openid.ns.ext1:http://openid.net/srv/ax/1.0
+openid.ns:http://specs.openid.net/auth/2.0
+openid.op_endpoint:https://www.google.com/accounts/o8/ud
+openid.response_nonce:2011-03-04T13:20:51ZjPcWv0Ld7yqwwQ
+openid.return_to:http://localhost:8096/incogito/j_spring_openid_security_check
+openid.sig:DDCB27kitB0EBQoGw2EwwvQO+aDuwr5qRpzGX7Ny3aw=
+openid.signed:op_endpoint,claimed_id,identity,return_to,response_nonce,assoc_handle,ns.ext1,ext1.mode,ext1.type.email,ext1.value.email
+
+Computing signature for input data:
+assoc_handle:AOQobUevMNpxwAPqNSwjMDGj1UPwKQqrKmT3CGjd6PBSQSk4ytv3inbX83IBE1ecTcwEEfO5
+claimed_id:https://www.google.com/accounts/o8/id?id=AItOawld8cIL2kgag2dERedqNoCddGJ1hfGOXTc
+ext1.mode:fetch_response
+ext1.type.email:http://axschema.org/contact/email
+ext1.value.email:javabin.portal@gmail.com
+identity:https://www.google.com/accounts/o8/id?id=AItOawld8cIL2kgag2dERedqNoCddGJ1hfGOXTc
+ns.ext1:http://openid.net/srv/ax/1.0
+op_endpoint:https://www.google.com/accounts/o8/ud
+response_nonce:2011-03-04T13:20:51ZjPcWv0Ld7yqwwQ
+return_to:http://localhost:8096/incogito/j_spring_openid_security_check
+
+Created fetch response from parameter list:
+mode:fetch_response
+value.email:javabin.portal@gmail.com
+type.email:http://axschema.org/contact/email
+
+
+
+
+Incogito Hospes SUCCESS: (1.0)
+
+Created auth request:
+openid.identity:http://localhost:8105/openid/id
+openid.return_to:http://localhost:8096/incogito/j_spring_openid_security_check?openid.rpnonce=2011-03-04T13%3A33%3A23Z0&openid.rpsig=nc8U3I9sOW5Ufpe3gk6JfYqHAZ1v9BXC8PAYkwLgfdg%3D
+openid.trust_root:http://localhost:8096/
+openid.assoc_handle:1299242903088-1
+openid.mode:checkid_setup
+
+Creating parameter list:
+openid.rpsig:nc8U3I9sOW5Ufpe3gk6JfYqHAZ1v9BXC8PAYkwLgfdg=
+openid.ext1.mode:fetch_response
+openid.return_to:http://localhost:8096/incogito/j_spring_openid_security_check?openid.rpnonce=2011-03-04T13%3A33%3A23Z0&openid.rpsig=nc8U3I9sOW5Ufpe3gk6JfYqHAZ1v9BXC8PAYkwLgfdg%3D
+openid.ext1.value.email:person1@lainternet.com
+openid.rpnonce:2011-03-04T13:33:23Z0
+openid.assoc_handle:1299242903088-1
+openid.signed:return_to,identity
+openid.ns.ext1:http://openid.net/srv/ax/1.0
+openid.identity:http://localhost:8105/openid/id/5777327044434609196
+openid.mode:id_res
+openid.sig:3T/q1YE8D62fiF75Q1m7LLcPmQo=
+openid.ext1.type.email:http://axschema.org/contact/email
+
+Created positive auth response:
+openid.rpsig:nc8U3I9sOW5Ufpe3gk6JfYqHAZ1v9BXC8PAYkwLgfdg=
+openid.ext1.mode:fetch_response
+openid.return_to:http://localhost:8096/incogito/j_spring_openid_security_check?openid.rpnonce=2011-03-04T13%3A33%3A23Z0&openid.rpsig=nc8U3I9sOW5Ufpe3gk6JfYqHAZ1v9BXC8PAYkwLgfdg%3D
+openid.ext1.value.email:person1@lainternet.com
+openid.rpnonce:2011-03-04T13:33:23Z0
+openid.assoc_handle:1299242903088-1
+openid.signed:return_to,identity
+openid.ns.ext1:http://openid.net/srv/ax/1.0
+openid.identity:http://localhost:8105/openid/id/5777327044434609196
+openid.mode:id_res
+openid.sig:3T/q1YE8D62fiF75Q1m7LLcPmQo=
+openid.ext1.type.email:http://axschema.org/contact/email
