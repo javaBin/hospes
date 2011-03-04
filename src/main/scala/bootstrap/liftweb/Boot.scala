@@ -122,8 +122,7 @@ class Boot {
     LiftRules.loggedInTest = Full(() => Person.loggedIn_?)
 
     // The loginFormUrl must match the openid form entry above
-    val baseUrl = "http://localhost:8105"
-    val openId = new OpenIdIntegration(baseUrl + "/openid/id", baseUrl +"/openid/login", baseUrl +"/openid/form", (key: Long) => baseUrl + "/openid/id/" + key)
+    val openId = new OpenIdIntegration("/openid/id", "/openid/login", "/openid/form", (key: Long) => "/openid/id/" + key)
     LiftRules.statelessDispatchTable.append(openId.statelessDispatch())
     LiftRules.dispatch.append(openId.dispatch())
 

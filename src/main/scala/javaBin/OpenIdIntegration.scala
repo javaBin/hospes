@@ -14,7 +14,7 @@ import scala.xml._
 
 object currentOpenIdRequest extends SessionVar[Option[ParameterList]](None)
 
-class OpenIdIntegration(endpointUrl: => String, loginUrl: => String, loginFormUrl: => String, openIdUrl: (Long) => String) {
+class OpenIdIntegration(endpointUrl: String, loginUrl: String, loginFormUrl: String, openIdUrl: (Long) => String) {
   // This has to match the patterns as it should be used to build the endpoint and openIdUrls
   val xrdsPath = "/openid/id"
 
@@ -25,12 +25,7 @@ class OpenIdIntegration(endpointUrl: => String, loginUrl: => String, loginFormUr
 
   private val xrds = ("Content-Type", "application/xrds+xml")
 
-  val manager = new ServerManager() {
-    setOPEndpointUrl(endpointUrl)
-    // for a working demo, not enforcing RP realm discovery
-    // since this new feature is not deployed
-    getRealmVerifier().setEnforceRpId(false)
-  }
+  val manager = new ServerManager()
 
   def getAttribute(person: Person)(t: (String, String)): (String, Option[String]) = t._2 match {
     case "http://axschema.org/contact/email" =>
@@ -46,10 +41,10 @@ class OpenIdIntegration(endpointUrl: => String, loginUrl: => String, loginFormUr
       (t._1, Some(person.lastName.get).filter("" !=))
   }
 
-  def processCheckidSetup(person: Person, request: ParameterList): Box[LiftResponse] = {
+  def processCheckidSetup(context: String, person: Person, request: ParameterList): Box[LiftResponse] = {
     val authReq = AuthRequest.createAuthRequest(request, manager.getRealmVerifier())
 
-    val openIdUrl = this.openIdUrl(person.openIdKey.get)
+    val openIdUrl = context + this.openIdUrl(person.openIdKey.get)
     println("AuthReq")
     println("OPEndpoint = " + authReq.getOPEndpoint())
     println("Identity   = " + authReq.getIdentity())
@@ -72,6 +67,7 @@ class OpenIdIntegration(endpointUrl: => String, loginUrl: => String, loginFormUr
       userSelId,
       userSelClaimed,
       true,
+      context + endpointUrl,
       false)
 
     if (response.isInstanceOf[DirectError]) {
@@ -170,14 +166,14 @@ class OpenIdIntegration(endpointUrl: => String, loginUrl: => String, loginFormUr
     new ParameterList(parameterMap)
   }
 
-  val generateXrds: Node =
+  def generateXrds(context: String): Node =
     <xrds:XRDS xmlns:xrds="xri://$xrds" xmlns:openid="http://openid.net/xmlns/1.0" xmlns="xri://$xrd*($v*2.0)">
       <XRD>
         <Service priority="0">
           <Type>http://openid.net/signon/1.0</Type>
           <Type>{AxMessage.OPENID_NS_AX}</Type>
           <Type>{SRegMessage.OPENID_NS_SREG}</Type>
-          <URI>{loginUrl}</URI>
+          <URI>{context + loginUrl}</URI>
         </Service>
       </XRD>
     </xrds:XRDS>
@@ -188,7 +184,7 @@ class OpenIdIntegration(endpointUrl: => String, loginUrl: => String, loginFormUr
       case HeadRequest =>
         Full(InMemoryResponse(Array(), Nil, Nil, 200))
       case GetRequest =>
-        val xml = generateXrds
+        val xml = generateXrds(req.hostAndPath)
         Full(InMemoryResponse(xml.toString.getBytes("utf-8"), List(xrds), Nil, 200))
       case _ =>
         Full(MethodNotAllowedResponse())
@@ -197,7 +193,7 @@ class OpenIdIntegration(endpointUrl: => String, loginUrl: => String, loginFormUr
       case HeadRequest =>
         Full(OkResponse())
       case GetRequest =>
-        val xml = generateXrds
+        val xml = generateXrds(req.hostAndPath)
         Full(InMemoryResponse(xml.toString.getBytes("utf-8"), List(xrds), Nil, 200))
       case _ =>
         Full(MethodNotAllowedResponse())
@@ -234,7 +230,7 @@ class OpenIdIntegration(endpointUrl: => String, loginUrl: => String, loginFormUr
           println("openid/login: openid.mode=checkid_setup. logged in=true")
           println(parameterList)
           currentOpenIdRequest.set(None)
-          processCheckidSetup(person, req)
+          processCheckidSetup(req.hostAndPath, person, req)
         case _ =>
           println("openid/login: openid.mode=checkid_setup. logged in=false")
           println(parameterList)
@@ -242,8 +238,8 @@ class OpenIdIntegration(endpointUrl: => String, loginUrl: => String, loginFormUr
           currentOpenIdRequest.set(Some(req))
 
           // And redirect to our login form
-          println("loginFormUrl=" + loginFormUrl)
-          Full(RedirectResponse(loginFormUrl))
+          println("loginFormUrl=" + req.hostAndPath + loginFormUrl)
+          Full(RedirectResponse(req.hostAndPath + loginFormUrl))
       }
 
     case req@Req(List("openid", "login"), "", method) => () =>
@@ -256,10 +252,10 @@ class OpenIdIntegration(endpointUrl: => String, loginUrl: => String, loginFormUr
       Person.currentUser match {
         case Full(person) if person.openIdKey.get != 0 =>
           currentOpenIdRequest.get match {
-            case Some(req) =>
+            case Some(parameterList) =>
               println("openid/retry-login: logged in=true, current openid request=true")
               currentOpenIdRequest.set(None)
-              processCheckidSetup(person, req)
+              processCheckidSetup(req.hostAndPath, person, parameterList)
             case None =>
               println("openid/retry-login: logged in=true, current openid request=false")
               missingOpenIdSession
@@ -270,7 +266,7 @@ class OpenIdIntegration(endpointUrl: => String, loginUrl: => String, loginFormUr
           currentOpenIdRequest.set(Some(req))
 
           // And redirect to our login form
-          Full(RedirectResponse(loginFormUrl))
+          Full(RedirectResponse(req.hostAndPath + loginFormUrl))
       }
 
     case req@Req(List("openid", "retry-login"), "", method) => () =>

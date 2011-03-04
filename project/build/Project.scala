@@ -22,6 +22,7 @@ class Project(info: ProjectInfo) extends DefaultWebProject(info) with IdeaProjec
   val log4j        = "log4j" % "log4j" % "1.2.16" withSources
 
   val openid4java  = "org.openid4java" % "openid4java-nodeps" % "0.9.5"
+  val httpClient   = "commons-httpclient" % "commons-httpclient" % "3.1"
 
   val jettyTest    = "org.mortbay.jetty" % "jetty" % "6.1.22" % "test" withSources
   val specs        = "org.scala-tools.testing" %% "specs" % "1.6.7" % "test" withSources
