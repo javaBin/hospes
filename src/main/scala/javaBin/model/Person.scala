@@ -29,12 +29,18 @@ object Person extends Person with MetaMegaProtoUser[Person] {
   override def signupMailSubject = S.?("sign.up.confirmation")
   override def passwordResetEmailSubject = S.?("reset.password.request")
 
+  override def beforeCreate = doBeforeCreate _ :: super.beforeCreate
+
+  private def doBeforeCreate(person: Person) {
+    person.openIdKey(abs(Random.nextLong))
+  }
+
   lazy val newMemberConfirmationPath = thePath("new_member_confirmation")
   def newMemberConfirmation(id: String) = {
     find(By(uniqueId, id)) match {
       case Full(user: Person) =>
         user.
-            setValidated(true).
+            validated(true).
             save
       case _ =>
     }
@@ -100,14 +106,6 @@ class Person extends MegaProtoUser[Person] with OneToMany[Long, Person] {
   def name = Seq(firstName, lastName).mkString(" ")
   def nameBox = if (firstName.get.isEmpty && lastName.get.isEmpty) Empty else Full(name)
   def mostPresentableName = nameBox.openOr(email.get)
-
-  // TODO: Why doesn't this override proto.ProtoUser.setValidated?
-  def setValidated(validated: Boolean): Person = {
-    if(validated && !this.validated) {
-      openIdKey(abs(Random.nextLong))
-    }
-    this.validated(validated)
-  }
 
   def thisYearsBoughtMemberships =
     Membership.findAll(

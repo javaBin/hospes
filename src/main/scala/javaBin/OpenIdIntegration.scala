@@ -25,7 +25,9 @@ class OpenIdIntegration(endpointUrl: String, loginUrl: String, loginFormUrl: Str
 
   private val xrds = ("Content-Type", "application/xrds+xml")
 
-  val manager = new ServerManager()
+  val manager = new ServerManager() {
+    getRealmVerifier.setEnforceRpId(true)
+  }
 
   def getAttribute(person: Person)(t: (String, String)): (String, Option[String]) = t._2 match {
     case "http://axschema.org/contact/email" =>

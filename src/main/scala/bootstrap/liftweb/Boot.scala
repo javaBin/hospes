@@ -25,7 +25,7 @@ class Boot {
             .lastName("Personson")
             .password("passord")
             .superUser(personNumber == 1)
-            .setValidated(personNumber != 2)
+            .validated(personNumber != 2)
             .save
         if (personNumber == 0 || personNumber == 1) {
           (0 to 10).foreach {

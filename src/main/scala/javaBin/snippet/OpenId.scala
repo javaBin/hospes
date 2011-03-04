@@ -25,10 +25,7 @@ class OpenId {
           // If the user exist and is authenticated through a password,
           // we can reveal more information if login fails.
           case Full(user: Person) if user.password.match_?(password) =>
-            if(user.openIdKey.get == 0) {
-              S.error("Your account does not have an OpenID URL. Please contact drift@java.no.")
-            }
-            else if (!user.validated.is) {
+            if (!user.validated.is) {
               S.error("Your account is not validated")
             }
             else {
