@@ -41,6 +41,8 @@ class OpenIdIntegration(endpointUrl: String, loginUrl: String, loginFormUrl: Str
       (t._1, Some(person.firstName.get).filter("" !=))
     case "http://axschema.org/namePerson/last" =>
       (t._1, Some(person.lastName.get).filter("" !=))
+    case id =>
+      (id, None)
   }
 
   def processCheckidSetup(context: String, person: Person, request: ParameterList): Box[LiftResponse] = {
@@ -89,22 +91,23 @@ class OpenIdIntegration(endpointUrl: String, loginUrl: String, loginFormUrl: Str
 
         println("FetchRequest")
         println("Required:")
-        println(requiredAttributes.map(_._1))
+        requiredAttributes.map(_._1).foreach(println)
         println("Optional:")
-        println(optionalAttributes.map(_._1))
+        optionalAttributes.map(_._1).foreach(println)
 
-        val requiredValues = requiredAttributes.map(getAttribute(person))
+        var requiredValues = requiredAttributes.map(getAttribute(person))
         val optionalValues = optionalAttributes.map(getAttribute(person))
 
         println("Required values")
-        println(requiredValues)
+        requiredValues.foreach(t => println(t._1 + "=>" + t._2))
         println("Optional values")
-        println(optionalValues)
+        optionalValues.foreach(t => println(t._1 + "=>" + t._2))
 
         val missingRequiredValues = requiredValues.filter(_._2.isEmpty).map(_._1)
         if(!missingRequiredValues.isEmpty) {
           println("Missing required values: " + missingRequiredValues)
-          // TODO: figure out what to return here
+          // TODO: figure out what to return here, for now just filter them out
+          requiredValues = requiredValues.filter(_._2.isDefined)
         }
 
         val v2 = requiredValues.map(t => (t._1, t._2.get)) ++
