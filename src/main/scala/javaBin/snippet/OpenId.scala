@@ -1,5 +1,6 @@
 package javaBin.snippet
 
+import javaBin.OpenIdIntegration
 import javaBin.model.Person
 import net.liftweb.common.Full
 import net.liftweb.http.S
@@ -30,7 +31,7 @@ class OpenId {
             }
             else {
               Person.logUserIn(user)
-              S.redirectTo("/openid/retry-login")
+              S.redirectTo(OpenIdIntegration.retryLoginPath)
             }
           case _ =>
             S.error("Invalid mail or password")

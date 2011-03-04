@@ -16,8 +16,8 @@ import net.liftweb.util.Helpers
 object currentOpenIdRequest extends SessionVar[Option[ParameterList]](None)
 
 object OpenIdIntegration {
-  // This has to match the patterns as it should be used to build the endpoint and openIdUrls
-  val xrdsPath = "/openid/xrds"
+  // This has to match the patterns
+  val retryLoginPath = "/openid/retry-login"
 }
 
 class OpenIdIntegration(loginFormUrl: String) {
@@ -81,7 +81,7 @@ class OpenIdIntegration(loginFormUrl: String) {
       userSelId,
       userSelClaimed,
       true,
-      context + "/openid/login",
+      context + "/openid/id",
       false)
 
     if (response.isInstanceOf[DirectError]) {
@@ -187,7 +187,7 @@ class OpenIdIntegration(loginFormUrl: String) {
         <Service priority="0">
           <Type>http://specs.openid.net/auth/2.0/server</Type>
           <Type>{AxMessage.OPENID_NS_AX}</Type>
-          <URI>{context + "/openid/login"}</URI>
+          <URI>{context + "/openid/id"}</URI>
         </Service>
       </XRD>
     </xrds:XRDS>
@@ -198,7 +198,7 @@ class OpenIdIntegration(loginFormUrl: String) {
         <Service priority="0">
           <Type>http://specs.openid.net/auth/2.0/signon</Type>
           <Type>{AxMessage.OPENID_NS_AX}</Type>
-          <URI>{context + "/openid/login"}</URI>
+          <URI>{context + "/openid/id"}</URI>
         </Service>
       </XRD>
     </xrds:XRDS>
@@ -233,40 +233,38 @@ class OpenIdIntegration(loginFormUrl: String) {
     val parameterList: ParameterList = req
     Person.currentUser match {
       case Full(person) =>
-        println("openid/login: openid.mode=checkid_setup. logged in=true")
+        println("openid/id: openid.mode=checkid_setup. logged in=true")
         println(parameterList)
         currentOpenIdRequest.set(None)
         processCheckidSetup(req.hostAndPath, person, req)
       case _ =>
-        println("openid/login: openid.mode=checkid_setup. logged in=false")
+        println("openid/id: openid.mode=checkid_setup. logged in=false")
         println(parameterList)
         // Save the request for later
         currentOpenIdRequest.set(Some(req))
 
         // And redirect to our login form
-        println("loginFormUrl=" + req.hostAndPath + loginFormUrl)
         Full(RedirectResponse(req.hostAndPath + loginFormUrl))
     }
   }
 
   def dispatch(): LiftRules.DispatchPF = {
-    case req@Req(List("openid", "login"), "", method) => () =>
-      println("openid.mode=" + req.param("openid.mode"))
+    case req@Req(List("openid", "id"), "", method) => () =>
       req.param("openid.mode") match {
         case Full("associate") =>
-          println("openid/login: openid.mode=associate")
+          println("openid/id: openid.mode=associate")
           val parameterList: ParameterList = req
           println(parameterList)
           val result = manager.associationResponse(parameterList).keyValueFormEncoding()
-          println("openid/login: openid.mode=associate. Result:")
+          println("openid/id: openid.mode=associate. Result:")
           println(result)
           Full(InMemoryResponse(result.getBytes("utf-8"), Nil, Nil, 200))
         case Full("check_authentication") =>
           val parameterList: ParameterList = req
-          println("openid/login: openid.mode=check_authentication")
+          println("openid/id: openid.mode=check_authentication")
           println(parameterList)
           val s = manager.verify(parameterList).keyValueFormEncoding()
-          println("openid/login: openid.mode=check_authentication. result:")
+          println("openid/id: openid.mode=check_authentication. result:")
           println(s)
           Full(InMemoryResponse(s.getBytes("utf-8"), Nil, Nil, 200))
         case Full("checkid_setup") =>
@@ -279,7 +277,7 @@ class OpenIdIntegration(loginFormUrl: String) {
               req.headers.foreach(t => println(t._1 + ": " + t._2))
               println("req.body=")
               println(new String(Helpers.readWholeStream(req.request.inputStream)))
-              println("openid/login: Unknown request: openid.mode=" + req.param("openid.mode").openOr("") + ", method=" + method.method)
+              println("openid/id: Unknown request: openid.mode=" + req.param("openid.mode").openOr("") + ", method=" + method.method)
               Full(MethodNotAllowedResponse())
             case _ =>
               val xml = generateClaimedIdentifierXrds(req.hostAndPath)
@@ -287,7 +285,6 @@ class OpenIdIntegration(loginFormUrl: String) {
           }
       }
 
-
     // This is where the form login redirects the user
     // Do not allow query parameters
     case req@Req(List("openid", "retry-login"), "", GetRequest) if req.request.queryString.isEmpty => () =>
@@ -315,64 +312,6 @@ class OpenIdIntegration(loginFormUrl: String) {
       println("openid/retry-login: Unknown request: method=" + method.method)
       Full(MethodNotAllowedResponse())
   }
-/*
-  def dispatch(): LiftRules.DispatchPF = {
-    case req@Req(List("openid", "login"), "", PostRequest) if openidMode(req, "associate") => () =>
-      println("openid/login: openid.mode=associate")
-      val parameterList: ParameterList = req
-      println(parameterList)
-      val result = manager.associationResponse(parameterList).keyValueFormEncoding()
-      println("openid/login: openid.mode=associate. Result:")
-      println(result)
-      Full(InMemoryResponse(result.getBytes("utf-8"), Nil, Nil, 200))
-
-    case req@Req(List("openid", "login"), "", PostRequest) if openidMode(req, "check_authentication") => () =>
-      val parameterList: ParameterList = req
-      println("openid/login: openid.mode=check_authentication")
-      println(parameterList)
-      val s = manager.verify(parameterList).keyValueFormEncoding()
-      println("openid/login: openid.mode=check_authentication. result:")
-      println(s)
-      Full(InMemoryResponse(s.getBytes("utf-8"), Nil, Nil, 200))
-
-    case req@Req(List("openid", "login"), "", _) => () =>
-      val xml = generateOpIdentifierXrds(req.hostAndPath)
-      Full(InMemoryResponse(xml.toString.getBytes("utf-8"), List(xrds), Nil, 200))
-
-    case req@Req(List("openid", "login"), "", _) if openidMode(req, "checkid_setup") => () =>
-      checkidSetup(req)
-    case req@Req(List("openid", "login"), "", method) => () =>
-      println("openid/login: Unknown request: openid.mode=" + req.param("openid.mode").openOr("") + ", method=" + method.method)
-      Full(MethodNotAllowedResponse())
-
-    // This is where the form login redirects the user
-    // Do not allow query parameters
-    case req@Req(List("openid", "retry-login"), "", GetRequest) if req.request.queryString.isEmpty => () =>
-      Person.currentUser match {
-        case Full(person) if person.openIdKey.get != 0 =>
-          currentOpenIdRequest.get match {
-            case Some(parameterList) =>
-              println("openid/retry-login: logged in=true, current openid request=true")
-              currentOpenIdRequest.set(None)
-              processCheckidSetup(req.hostAndPath, person, parameterList)
-            case None =>
-              println("openid/retry-login: logged in=true, current openid request=false")
-              missingOpenIdSession
-          }
-        case _ =>
-          println("openid/retry-login: logged in=false")
-          // Save the request for later
-          currentOpenIdRequest.set(Some(req))
-
-          // And redirect to our login form
-          Full(RedirectResponse(req.hostAndPath + loginFormUrl))
-      }
-
-    case req@Req(List("openid", "retry-login"), "", method) => () =>
-      println("openid/retry-login: Unknown request: method=" + method.method)
-      Full(MethodNotAllowedResponse())
-  }
-*/
 
   def missingOpenIdSession() = {
     val msg = "No active OpenId session. Please go back to the application came from and try again."
