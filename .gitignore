@@ -6,5 +6,6 @@
 target
 lib_managed
 project/boot
+project-old/boot
 project/plugins/src_managed/
 project/plugins/project
