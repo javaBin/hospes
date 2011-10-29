@@ -18,7 +18,7 @@ import net.liftweb.http._
 
 object MembershipResourceSpec extends Specification {
   Props.mode
-  Boot.databaseSetup
+  Boot.databaseSetup()
 
   new SpecContext {
     def around(a: => Any) = {
@@ -34,7 +34,7 @@ object MembershipResourceSpec extends Specification {
     val latch = new CountDownLatch(1)
     var msg:MimeMessage = null
     Mailer.testModeSend.default.set((message:MimeMessage) => {
-      latch.countDown
+      latch.countDown()
       msg = message
     })
     f
@@ -45,7 +45,7 @@ object MembershipResourceSpec extends Specification {
   def beSentTo(email:String) = new Matcher[MimeMessage]{
     def apply(msg: => MimeMessage) = {
       val message = msg
-      val to = message.getRecipients(RecipientType.TO).getValue.apply(0).toString
+      val to = message.getRecipients(RecipientType.TO).getValue().apply(0).toString
       (to == email, to + " == " + email, to + " != " + email)
     }
   }

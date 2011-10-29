@@ -107,6 +107,11 @@ class Person extends MegaProtoUser[Person] with OneToMany[Long, Person] {
   def nameBox = if (firstName.get.isEmpty && lastName.get.isEmpty) Empty else Full(name)
   def mostPresentableName = nameBox.openOr(email.get)
 
+  def mailingLists =
+    MailingListSubscription.findAll(
+      By(MailingListSubscription.member, this.id),
+      OrderBy(MailingListSubscription.mailingList, Ascending))
+
   def thisYearsBoughtMemberships =
     Membership.findAll(
       By(Membership.boughtBy, this.id),

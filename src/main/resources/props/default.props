@@ -4,3 +4,11 @@ mail.smtp.host=localhost
 
 webshop.user=webshop
 webshop.password=webschopp
+
+mailing.lists=1,2,3,4,5,6
+mailing.list.1=M\u00f8ter Oslo
+mailing.list.2=M\u00f8ter S\u00f8rlandet
+mailing.list.3=M\u00f8ter Bergen
+mailing.list.4=M\u00f8ter Stavanger
+mailing.list.5=M\u00f8ter Trondheim
+mailing.list.6=M\u00f8ter Innlandet

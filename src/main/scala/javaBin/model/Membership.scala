@@ -8,12 +8,12 @@ object Membership extends Membership with LongKeyedMetaMapper[Membership] with C
   def membershipsPath = "memberships"
   def adminPath = "admin"
 
-  def createMany(i: Int, person: Person): Unit = {
+  def createMany(i: Int, person: Person) {
     (0 until i).foreach{
       _ =>
         val membership = Membership.create
         membership.boughtBy.set(person.id)
-        membership.save
+        membership.save()
     }
   }
 }

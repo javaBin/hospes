@@ -15,7 +15,7 @@ import net.liftweb.util.{LoggingAutoConfigurer, Mailer, Props}
 
 class Boot {
 
-  def testModePopulate: Unit = {
+  def testModePopulate() {
     (0 to 10).map{
       personNumber =>
         val person = Person.create
@@ -26,7 +26,7 @@ class Boot {
             .password("passord")
             .superUser(personNumber == 1)
             .validated(personNumber != 2)
-            .save
+            .save()
         if (personNumber == 0 || personNumber == 1) {
           (0 to 10).foreach {
             index =>
@@ -34,14 +34,14 @@ class Boot {
               membership.year(if (personNumber == 0) 2011 else 2010).boughtBy(person.id)
               if (personNumber == 0 && index == 0)
                 membership.member(person.id)
-              membership.save
+              membership.save()
           }
         }
         person
     }
   }
 
-  def restAuthenticationSetup: Unit = {
+  def restAuthenticationSetup() {
     val systemRole = AuthRole("system")
     val webshopUser = Props.get("webshop.user").open_!
     val webshopPwd = Props.get("webshop.password").open_!
@@ -57,7 +57,7 @@ class Boot {
     }
   }
 
-  def setupEmail: Unit = {
+  def setupEmail() {
     System.setProperty("mail.smtp.host", Props.get("mail.smtp.host").open_!)
     System.setProperty("mail.smtp.port", Props.get("mail.smtp.port").openOr("25"))
     val auth =
@@ -92,14 +92,14 @@ class Boot {
 
     LiftRules.fixCSS("css" :: "java_membership" :: Nil, Empty)
 
-    setupEmail
-    Boot.databaseSetup
+    setupEmail()
+    Boot.databaseSetup()
     Props.mode match {
       case Props.RunModes.Development =>
-        testModePopulate
+        testModePopulate()
       case _ =>
     }
-    restAuthenticationSetup
+    restAuthenticationSetup()
 
     LiftRules.dispatch.append(MembershipResource)
     LiftRules.addToPackages("javaBin")
@@ -109,6 +109,7 @@ class Boot {
       ((Menu("hidden") / "openid" / "form") >> Loc.Hidden) ::
       Person.sitemap :::
       (Menu(S.?("admin.menu.title")) / Membership.adminPath >> Person.loginFirst >> Person.isSuperUser) ::
+      (Menu(S.?("mailing.lists.menu.title")) / MailingListSubscription.mailingListsPath >> Person.loginFirst) ::
       (Menu(S.?("memberships.menu.title")) / Membership.membershipsPath >> Person.loginFirst >> Person.isMembershipOwner) ::
       Person.logoutMenuLoc.toList
 
@@ -126,12 +127,12 @@ class Boot {
     LiftRules.statelessDispatchTable.append(openId.statelessDispatch())
     LiftRules.dispatch.append(openId.dispatch())
 
-    S.addAround(DB.buildLoanWrapper)
+    S.addAround(DB.buildLoanWrapper())
   }
 }
 
 object Boot {
-  def databaseSetup: Unit = {
+  def databaseSetup() {
     if (!DB.jndiJdbcConnAvailable_?) {
       val vendor =
         new StandardDBVendor(Props.get("db.driver") openOr "org.h2.Driver",
@@ -140,6 +141,6 @@ object Boot {
       LiftRules.unloadHooks.append(vendor.closeAllConnections_! _)
       DB.defineConnectionManager(DefaultConnectionIdentifier, vendor)
     }
-    Schemifier.schemify(true, Schemifier.infoF _, Person, Membership)
+    Schemifier.schemify(true, Schemifier.infoF _, Person, Membership, MailingListSubscription)
   }
 }
