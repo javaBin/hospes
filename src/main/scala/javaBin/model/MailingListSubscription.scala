@@ -9,7 +9,15 @@ object MailingListSubscription extends MailingListSubscription with LongKeyedMet
 class MailingListSubscription extends LongKeyedMapper[MailingListSubscription] with IdPK {
   def getSingleton = MailingListSubscription
 
-  object mailingList extends MappedInt(this)
+  def name = MailingListEnumeration(mailingList.is).toString
+
+  object checked extends MappedBoolean(this) {
+    override def dbColumnName = "checked"
+  }
+
+  object mailingList extends MappedInt(this) {
+    override def dbColumnName = "mailing_list_id"
+  }
 
   object member extends LongMappedMapper(this, Person) {
     override def dbColumnName = "member_person_id"

@@ -1,19 +1,23 @@
 package javaBin.snippet
 
-import javaBin.model.{MailingListEnumeration, Person}
 import net.liftweb.http.SHtml
-import net.liftweb.http.js.JsCmds
 import net.liftweb.util.Helpers
 import Helpers._
 import xml.{Text, NodeSeq}
+import net.liftweb.http.js.{JsCmd, JsCmds}
+import javaBin.model.{MailingListSubscription, MailingListEnumeration, Person}
 
 class MailingLists {
 
   private def bindMailingLists(person: Person)(template: NodeSeq): NodeSeq =
-    MailingListEnumeration.values.toList.sortBy(_.id).flatMap {
+    person.mailingLists.sortBy(_.mailingList.is).flatMap {
       mailingList =>
+        def toggle(set: Boolean): JsCmd = {
+          person.mailingList(mailingList.mailingList.is).checked(set).save()
+          JsCmds.Noop
+        }
         bind("mailingList", template,
-          "toggle" -> (SHtml.ajaxCheckbox(false, _ => JsCmds.Noop) ++ Text(mailingList.toString)))
+          "toggle" -> (SHtml.ajaxCheckbox(mailingList.checked.is, toggle) ++ Text(mailingList.name)))
     }
 
   def render(template: NodeSeq): NodeSeq = {

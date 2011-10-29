@@ -40,8 +40,8 @@ object Person extends Person with MetaMegaProtoUser[Person] {
     find(By(uniqueId, id)) match {
       case Full(user: Person) =>
         user.
-            validated(true).
-            save
+                validated(true).
+                save
       case _ =>
     }
     passwordReset(id)
@@ -50,9 +50,9 @@ object Person extends Person with MetaMegaProtoUser[Person] {
     Full(Menu(Loc("NewMemberConfirmation", (newMemberConfirmationPath, true), S.?("new.member.confirmation"), newMemberConfirmationMenuLocParams)))
   protected def newMemberConfirmationMenuLocParams: List[LocParam[Unit]] =
     Hidden ::
-    Template(() => wrapIt(newMemberConfirmation(snarfLastItem))) ::
-    If(notLoggedIn_? _, S.??("logout.first")) ::
-    Nil
+            Template(() => wrapIt(newMemberConfirmation(snarfLastItem))) ::
+            If(notLoggedIn_? _, S.??("logout.first")) ::
+            Nil
   override protected def lostPasswordMenuLocParams = Hidden :: super.lostPasswordMenuLocParams
   override protected def logoutMenuLocParams = Hidden :: super.logoutMenuLocParams
   override protected def loginMenuLocParams = Hidden :: super.loginMenuLocParams
@@ -68,28 +68,36 @@ object Person extends Person with MetaMegaProtoUser[Person] {
 
   override def signupXhtml(user: Person) =
     <div>
-      <h2>{S.??("sign.up")}</h2>
+      <h2>
+        {S.??("sign.up")}
+      </h2>
       <form method="post" action={S.uri}>
         <table>
-          {localForm(user, false, signupFields)}
-          <tr>
-            <td>&nbsp;</td>
-            <td><user:submit/></td>
-          </tr>
+          {localForm(user, false, signupFields)}<tr>
+          <td>
+            &nbsp;
+          </td>
+          <td>
+              <user:submit/>
+          </td>
+        </tr>
         </table>
       </form>
     </div>
 
   def javaBinStandardGreeting: NodeSeq = (
-    <p>
-      Med vennlig hilsen<br/>
-      javaBin
-    </p>
-    <p>
-      Kontaktinfo:<br/>
-      portal@java.no<br/>
-      www.java.no
-    </p>)
+          <p>
+            Med vennlig hilsen
+              <br/>
+            javaBin
+          </p>
+                  <p>
+                    Kontaktinfo:
+                      <br/>
+                    portal@java.no
+                      <br/>
+                    www.java.no
+                  </p>)
 }
 
 class Person extends MegaProtoUser[Person] with OneToMany[Long, Person] {
@@ -107,10 +115,24 @@ class Person extends MegaProtoUser[Person] with OneToMany[Long, Person] {
   def nameBox = if (firstName.get.isEmpty && lastName.get.isEmpty) Empty else Full(name)
   def mostPresentableName = nameBox.openOr(email.get)
 
-  def mailingLists =
+  def mailingList(mailingListId: Int) = {
     MailingListSubscription.findAll(
       By(MailingListSubscription.member, this.id),
-      OrderBy(MailingListSubscription.mailingList, Ascending))
+      By(MailingListSubscription.mailingList, mailingListId)
+    ).headOption.getOrElse {
+      MailingListSubscription.create.member(this).mailingList(mailingListId)
+    }
+  }
+
+  def mailingLists = {
+    val existing = MailingListSubscription.findAll(By(MailingListSubscription.member, this.id))
+    MailingListEnumeration.values.toList.map {
+      value =>
+        existing.find(_.mailingList.is == value.id).getOrElse {
+          MailingListSubscription.create.member(this).mailingList(value.id)
+        }
+    }
+  }
 
   def thisYearsBoughtMemberships =
     Membership.findAll(
@@ -127,7 +149,9 @@ class Person extends MegaProtoUser[Person] with OneToMany[Long, Person] {
       "member" -> shortName,
       "boughtBy" -> other.shortName,
       "footer" -> Person.javaBinStandardGreeting,
-      "userEditLink" -> <a target="_blank" href={editPath}>{editPath}</a>))
+      "userEditLink" -> <a target="_blank" href={editPath}>
+        {editPath}
+      </a>))
   }
 
   def mailMe(xhtml: NodeSeq): Unit = {
@@ -151,13 +175,17 @@ class Person extends MegaProtoUser[Person] with OneToMany[Long, Person] {
     mailMe(bind("info", template("mail-memberships-received-old-user"),
       "boughtBy" -> shortName,
       "footer" -> Person.javaBinStandardGreeting,
-      "memberships" -> <a target="_blank" href={membershipLink}>{membershipLink}</a>));
+      "memberships" -> <a target="_blank" href={membershipLink}>
+        {membershipLink}
+      </a>));
   }
 
   def sendMembershipsReceivedAndUserCreateEmail {
     mailMe(bind("info", template("mail-memberships-received-new-user"),
       "boughtBy" -> shortName,
       "footer" -> Person.javaBinStandardGreeting,
-      "userVerification" -> <a target="_blank" href={confirmationLink}>{confirmationLink}</a>))
+      "userVerification" -> <a target="_blank" href={confirmationLink}>
+        {confirmationLink}
+      </a>))
   }
 }
