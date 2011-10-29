@@ -40,6 +40,6 @@ libraryDependencies += "commons-httpclient" % "commons-httpclient" % "3.1"
 libraryDependencies += "org.scala-tools.testing" %% "specs" % "1.6.7" % "test"
 
 //Jetty
-libraryDependencies += "org.eclipse.jetty" % "jetty-webapp" % "7.3.0.v20110203" % "jetty"
+libraryDependencies += "org.eclipse.jetty" % "jetty-webapp" % "7.3.0.v20110203" % "container"
 
 
