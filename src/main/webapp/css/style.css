@@ -271,6 +271,9 @@ span.infotxt {
 	background-color: #494949;
 }
 
+label.normal {
+    float: none;
+}
 
 label {
 	display: block;
