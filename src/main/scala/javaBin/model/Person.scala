@@ -32,16 +32,14 @@ object Person extends Person with MetaMegaProtoUser[Person] {
   override def beforeCreate = doBeforeCreate _ :: super.beforeCreate
 
   private def doBeforeCreate(person: Person) {
-    person.openIdKey(abs(Random.nextLong))
+    person.openIdKey(abs(Random.nextLong()))
   }
 
   lazy val newMemberConfirmationPath = thePath("new_member_confirmation")
   def newMemberConfirmation(id: String) = {
     find(By(uniqueId, id)) match {
       case Full(user: Person) =>
-        user.
-                validated(true).
-                save
+        user.validated(true).save()
       case _ =>
     }
     passwordReset(id)
@@ -154,7 +152,7 @@ class Person extends MegaProtoUser[Person] with OneToMany[Long, Person] {
       </a>))
   }
 
-  def mailMe(xhtml: NodeSeq): Unit = {
+  def mailMe(xhtml: NodeSeq) {
     Mailer.sendMail(
       From(Person.emailFrom),
       Subject((xhtml \\ "title").text.trim),
@@ -170,7 +168,7 @@ class Person extends MegaProtoUser[Person] with OneToMany[Long, Person] {
       "userVerification" -> confirmationLink))
   }
 
-  def sendMembershipsReceivedEmail {
+  def sendMembershipsReceivedEmail() {
     val membershipLink = (S.hostAndPath :: Membership.membershipsPath :: Nil).mkString("/")
     mailMe(bind("info", template("mail-memberships-received-old-user"),
       "boughtBy" -> shortName,
@@ -180,7 +178,7 @@ class Person extends MegaProtoUser[Person] with OneToMany[Long, Person] {
       </a>));
   }
 
-  def sendMembershipsReceivedAndUserCreateEmail {
+  def sendMembershipsReceivedAndUserCreateEmail() {
     mailMe(bind("info", template("mail-memberships-received-new-user"),
       "boughtBy" -> shortName,
       "footer" -> Person.javaBinStandardGreeting,

@@ -4,6 +4,9 @@ import net.liftweb.mapper._
 
 object MailingListSubscription extends MailingListSubscription with LongKeyedMetaMapper[MailingListSubscription] with CRUDify[Long, MailingListSubscription] {
   val mailingListsPath = "mailing_lists"
+
+  def findSubscribers(mailingListValue: MailingListEnumeration.Value): List[MailingListSubscription] =
+    MailingListSubscription.findAll(By(mailingList, mailingListValue.id), By(checked, true))
 }
 
 class MailingListSubscription extends LongKeyedMapper[MailingListSubscription] with IdPK {
