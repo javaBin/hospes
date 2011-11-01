@@ -4,12 +4,11 @@ package rest
 import model.{Membership, Person}
 
 import net.liftweb.common._
-import net.liftweb.http.rest.RestHelper
 import net.liftweb.http._
-import net.liftweb.json.{JsonParser, JsonAST, JsonDSL}
+import net.liftweb.json.JsonAST
 import net.liftweb.json.JsonAST._
 import net.liftweb.json.JsonDSL._
-import net.liftweb.mapper.{MappedEmail, By}
+import net.liftweb.mapper.By
 
 import dispatch.Http
 
@@ -19,13 +18,13 @@ object MembershipResource extends BetterRestHelper with Extractors {
     case JsonPost("rest" :: "memberships" :: Nil, (json, _)) => createMembership(json)
 
     case JsonGet("rest" :: "memberships" :: email :: Nil, req) =>
-      val realmail = Http -% (email + (if (req.path.suffix.isEmpty) "" else "." + req.path.suffix))
+      val realMail = Http -% (email + (if (req.path.suffix.isEmpty) "" else "." + req.path.suffix))
       (for{
-        person <- Person.find(By(Person.email, realmail)) if person.hasActiveMembership && person.validated
+        person <- Person.find(By(Person.email, realMail)) if person.hasActiveMembership && person.validated
       } yield JsonResponse(asJson(person))).or(Full(NotFoundResponse()))
 
     case JsonGet("rest" :: "memberships" :: Nil, _) =>
-      val members = Person.findAll.filter(person => person.hasActiveMembership && person.validated)
+      val members = Person.findAll().filter(person => person.hasActiveMembership && person.validated)
       JsonResponse("members" -> JArray(members.map(asJson)))
   }
 

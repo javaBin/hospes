@@ -28,7 +28,7 @@ trait BetterRestHelper extends RestHelper {
 
   protected trait CsvTest {
     def testResponse_?(r: Req): Boolean =
-      r.weightedAccept.find(_.matches("text" -> "json")).isDefined ||
+      r.weightedAccept.find(_.matches("text" -> "csv")).isDefined ||
               (r.weightedAccept.isEmpty && r.path.suffix.equalsIgnoreCase("csv"))
   }
 

@@ -78,7 +78,7 @@ class Boot {
     System.setProperty("mail.smtp.auth", auth.isDefined.toString)
   }
 
-  def boot {
+  def boot() {
     Logger.setup = Full(LoggingAutoConfigurer())
 
     val localFile = () => {

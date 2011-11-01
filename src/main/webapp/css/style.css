@@ -273,6 +273,7 @@ span.infotxt {
 
 label.normal {
     float: none;
+    width: 100%;
 }
 
 label {
