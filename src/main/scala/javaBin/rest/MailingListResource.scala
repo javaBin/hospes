@@ -1,9 +1,9 @@
 package javaBin.rest
 
 import javaBin.model.{Person, MailingListSubscription, MailingListEnumeration}
-import net.liftweb.mapper.By
-import net.liftweb.common.Box
 import net.liftweb.http.OkResponse
+import net.liftweb.mapper.{By, MappedEmail}
+import net.liftweb.common.{Full, Box}
 
 object MailingListResource extends BetterRestHelper {
 
@@ -22,16 +22,20 @@ object MailingListResource extends BetterRestHelper {
           )
       })
 
-    case PlainTextPut("rest" :: "mailingLists" :: name :: Nil, (text, req)) =>
-      Box(
-        for {
-          mailingListValue <- findMailingList(name)
-          person <- Person.find(By(Person.email, text.trim.toLowerCase)).toOption
-        } yield {
-          person.mailingList(mailingListValue.id).checked(true).save()
-          OkResponse()
+    case PlainTextPut("rest" :: "mailingLists" :: name :: Nil, (text, _)) => {
+      val email = text.trim.toLowerCase
+      if (!MappedEmail.emailPattern.matcher(email).matches()) {
+        Full(ExplicitBadResponse("Text doesn't match the email pattern"))
+      } else for {
+        mailingListValue <- Box(findMailingList(name))
+        person <- Person.find(By(Person.email, email)).or {
+          Full(Person.create.email(email).saveMe())
         }
-      )
+      } yield {
+        person.mailingList(mailingListValue.id).checked(true).save()
+        OkResponse()
+      }
+    }
   }
 
 }
