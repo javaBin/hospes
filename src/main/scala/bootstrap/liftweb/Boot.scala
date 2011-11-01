@@ -4,7 +4,6 @@ import java.util.Locale
 import java.io.{FileInputStream, File}
 import javaBin.OpenIdIntegration
 import javaBin.model._
-import javaBin.rest.MembershipResource
 import javax.mail.{PasswordAuthentication, Authenticator}
 import net.liftweb.http._
 import net.liftweb.http.auth.{userRoles, HttpBasicAuthentication, AuthRole}
@@ -12,6 +11,7 @@ import net.liftweb.mapper.{Schemifier, DB, StandardDBVendor, DefaultConnectionId
 import net.liftweb.sitemap.{SiteMap, Menu, Loc}
 import net.liftweb.common.{Logger, Empty, Full}
 import net.liftweb.util.{LoggingAutoConfigurer, Mailer, Props}
+import javaBin.rest.{MailingListResource, MembershipResource}
 
 class Boot {
 
@@ -42,18 +42,25 @@ class Boot {
   }
 
   def restAuthenticationSetup() {
-    val systemRole = AuthRole("system")
+    val webshopRole = AuthRole("webshop")
     val webshopUser = Props.get("webshop.user").open_!
     val webshopPwd = Props.get("webshop.password").open_!
+    val mailingListUser = Props.get("mailing.list.user").open_!
+    val mailingListPwd = Props.get("mailing.list.password").open_!
+    val mailingListRole = AuthRole("mailinglist")
 
     LiftRules.authentication = HttpBasicAuthentication("lift") {
       case (`webshopUser`, `webshopPwd`, _) =>
-        userRoles(systemRole :: Nil)
+        userRoles(webshopRole :: Nil)
+        true
+      case (`mailingListUser`, `mailingListPwd`, _) =>
+        userRoles(mailingListRole :: Nil)
         true
     }
 
     LiftRules.httpAuthProtectedResource.append {
-      case Req("rest" :: _, _, _) => Full(systemRole)
+      case Req("rest" :: "mailingLists" :: _, _, _) => Full(mailingListRole)
+      case Req("rest" :: "memberships" :: _, _, _) => Full(webshopRole)
     }
   }
 
@@ -102,6 +109,7 @@ class Boot {
     restAuthenticationSetup()
 
     LiftRules.dispatch.append(MembershipResource)
+    LiftRules.dispatch.append(MailingListResource)
     LiftRules.addToPackages("javaBin")
 
     val entries =

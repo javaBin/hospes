@@ -5,6 +5,9 @@ mail.smtp.host=localhost
 webshop.user=webshop
 webshop.password=webschopp
 
+mailing.list.user=mailinglist
+mailing.list.password=schmailinglist
+
 mailing.lists=1,2,3,4,5,6
 mailing.list.1=M\u00f8ter Oslo
 mailing.list.2=M\u00f8ter S\u00f8rlandet
