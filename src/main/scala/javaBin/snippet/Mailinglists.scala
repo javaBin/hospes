@@ -4,7 +4,7 @@ import net.liftweb.util.Helpers
 import Helpers._
 import xml.{Text, NodeSeq}
 import net.liftweb.http.js.{JsCmd, JsCmds}
-import javaBin.model.{MailingListSubscription, MailingListEnumeration, Person}
+import javaBin.model.Person
 import net.liftweb.http.{S, SHtml}
 
 class MailingLists {
@@ -12,14 +12,15 @@ class MailingLists {
   private def bindMailingLists(person: Person, redrawAll: () => JsCmd)(template: NodeSeq): NodeSeq =
     person.mailingLists.sortBy(_.mailingList.is).flatMap {
       mailingList =>
+        val mailingListName = S.?("mailing.list." + mailingList.name)
         def toggle(set: Boolean): JsCmd = {
           person.mailingList(mailingList.mailingList.is).checked(set).save()
           val msg = if (set) "mailing.list.added" else "mailing.list.removed"
-          S.notice(S.?(msg, mailingList.name))
+          S.notice(S.?(msg, mailingListName))
           redrawAll() & JsCmds.Noop
         }
         bind("mailingList", template,
-          "toggle" -> (SHtml.ajaxCheckbox(mailingList.checked.is, toggle) ++ Text(mailingList.name)))
+          "toggle" -> (SHtml.ajaxCheckbox(mailingList.checked.is, toggle) ++ Text(mailingListName)))
     }
 
   def render(template: NodeSeq): NodeSeq = {
