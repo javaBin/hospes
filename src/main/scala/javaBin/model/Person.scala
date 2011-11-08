@@ -113,12 +113,12 @@ class Person extends MegaProtoUser[Person] with OneToMany[Long, Person] {
   def nameBox = if (firstName.get.isEmpty && lastName.get.isEmpty) Empty else Full(name)
   def mostPresentableName = nameBox.openOr(email.get)
 
-  def mailingList(mailingListId: Int) = {
+  def mailingList(mailingListName: String) = {
     MailingListSubscription.findAll(
       By(MailingListSubscription.member, this.id),
-      By(MailingListSubscription.mailingList, mailingListId)
+      By(MailingListSubscription.mailingList, mailingListName)
     ).headOption.getOrElse {
-      MailingListSubscription.create.member(this).mailingList(mailingListId)
+      MailingListSubscription.create.member(this).mailingList(mailingListName)
     }
   }
 
@@ -126,8 +126,8 @@ class Person extends MegaProtoUser[Person] with OneToMany[Long, Person] {
     val existing = MailingListSubscription.findAll(By(MailingListSubscription.member, this.id))
     MailingListEnumeration.values.toList.map {
       value =>
-        existing.find(_.mailingList.is == value.id).getOrElse {
-          MailingListSubscription.create.member(this).mailingList(value.id)
+        existing.find(_.mailingList.is == value.toString).getOrElse {
+          MailingListSubscription.create.member(this).mailingList(value.toString)
         }
     }
   }

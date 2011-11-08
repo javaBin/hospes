@@ -6,19 +6,17 @@ object MailingListSubscription extends MailingListSubscription with LongKeyedMet
   val mailingListsPath = "mailing_lists"
 
   def findSubscribers(mailingListValue: MailingListEnumeration.Value): List[MailingListSubscription] =
-    MailingListSubscription.findAll(By(mailingList, mailingListValue.id), By(checked, true))
+    MailingListSubscription.findAll(By(mailingList, mailingListValue.toString), By(checked, true))
 }
 
 class MailingListSubscription extends LongKeyedMapper[MailingListSubscription] with IdPK {
   def getSingleton = MailingListSubscription
 
-  def name = MailingListEnumeration(mailingList.is).toString
-
   object checked extends MappedBoolean(this) {
     override def dbColumnName = "checked"
   }
 
-  object mailingList extends MappedInt(this) {
+  object mailingList extends MappedString(this, 255) {
     override def dbColumnName = "mailing_list_id"
   }
 

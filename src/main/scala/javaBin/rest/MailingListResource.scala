@@ -7,12 +7,9 @@ import net.liftweb.common.{Full, Box}
 
 object MailingListResource extends BetterRestHelper {
 
-  def findMailingList(listName: String): Option[MailingListEnumeration.Value] =
-    MailingListEnumeration.values.find(listName == _.toString)
-
   serve {
     case CsvGet("rest" :: "mailingLists" :: name :: Nil, req) =>
-      Box(findMailingList(name).map {
+      Box(MailingListEnumeration.find(name).map {
         mailingListValue =>
           CsvResponse(
             for {
@@ -22,17 +19,17 @@ object MailingListResource extends BetterRestHelper {
           )
       })
 
-    case PlainTextPut("rest" :: "mailingLists" :: name :: Nil, (text, _)) => {
+    case PlainTextPut("rest" :: "mailingLists" :: mailingListName :: Nil, (text, _)) => {
       val email = text.trim.toLowerCase
       if (!MappedEmail.emailPattern.matcher(email).matches()) {
         Full(ExplicitBadResponse("Text doesn't match the email pattern"))
       } else for {
-        mailingListValue <- Box(findMailingList(name))
+        _ <- Box(MailingListEnumeration.find(mailingListName))
         person <- Person.find(By(Person.email, email)).or {
           Full(Person.create.email(email).saveMe())
         }
       } yield {
-        person.mailingList(mailingListValue.id).checked(true).save()
+        person.mailingList(mailingListName).checked(true).save()
         OkResponse()
       }
     }
