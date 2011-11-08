@@ -12,7 +12,7 @@ class MailingLists {
   private def bindMailingLists(person: Person, redrawAll: () => JsCmd)(template: NodeSeq): NodeSeq =
     person.mailingLists.sortBy(_.mailingList.is).flatMap {
       mailingListSubscription =>
-        val mailingListName = S.?("mailing.list." + mailingListSubscription.name)
+        val mailingListName = S.?("mailing.list." + mailingListSubscription.mailingList.is)
         def toggle(set: Boolean): JsCmd = {
           person.mailingList(mailingListSubscription.mailingList.is).checked(set).save()
           val msg = if (set) "mailing.list.added" else "mailing.list.removed"
