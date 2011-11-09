@@ -1,9 +1,9 @@
 package javaBin.rest
 
 import javaBin.model.{Person, MailingListSubscription, MailingListEnumeration}
-import net.liftweb.http.OkResponse
 import net.liftweb.mapper.{By, MappedEmail}
 import net.liftweb.common.{Full, Box}
+import net.liftweb.http.NoContentResponse
 
 object MailingListResource extends BetterRestHelper {
 
@@ -19,7 +19,7 @@ object MailingListResource extends BetterRestHelper {
           )
       })
 
-    case PlainTextPut("rest" :: "mailingLists" :: mailingListName :: Nil, (text, _)) => {
+    case Put("rest" :: "mailingLists" :: mailingListName :: text :: Nil, _) => {
       val email = text.trim.toLowerCase
       if (!MappedEmail.emailPattern.matcher(email).matches()) {
         Full(ExplicitBadResponse("Text doesn't match the email pattern"))
@@ -30,7 +30,7 @@ object MailingListResource extends BetterRestHelper {
         }
       } yield {
         person.mailingList(mailingListName).checked(true).save()
-        OkResponse()
+        NoContentResponse()
       }
     }
   }

@@ -24,23 +24,11 @@ trait BetterRestHelper extends RestHelper {
 
   override protected lazy val JsonPost = new TestPost[JValue] with JsonTest with RealJsonBody
 
-  protected object PlainTextPut {
-    def unapply(r: Req): Option[(List[String], (String, Req))] =
-      if (r.put_? && testResponse_?(r))
-        body(r).toOption.map(b => (r.path.partPath -> (b -> r))) else None
-
-    def testResponse_?(r: Req): Boolean =
-      r.weightedAccept.find(_.matches("text" -> "plain")).isDefined ||
-              (r.weightedAccept.isEmpty && r.path.suffix.equalsIgnoreCase("txt"))
-
-    def body(r: Req): Box[String] = Box(r.body.map(bs => new String(bs)))
-  }
-
   protected lazy val CsvGet = new TestGet with CsvTest
 
   protected trait CsvTest {
     def testResponse_?(r: Req): Boolean =
-      r.weightedAccept.find(_.matches("text" -> "csv")).isDefined ||
+      r.weightedAccept.find(_.matches("text" -> "csv")).isDefined || r.weightedAccept.isEmpty ||
               (r.weightedAccept.isEmpty && r.path.suffix.equalsIgnoreCase("csv"))
   }
 
