@@ -4,12 +4,11 @@ package rest
 import model.{Membership, Person}
 
 import net.liftweb.common._
-import net.liftweb.http.rest.RestHelper
 import net.liftweb.http._
-import net.liftweb.json.{JsonParser, JsonAST, JsonDSL}
+import net.liftweb.json.JsonAST
 import net.liftweb.json.JsonAST._
 import net.liftweb.json.JsonDSL._
-import net.liftweb.mapper.{MappedEmail, By}
+import net.liftweb.mapper.By
 
 import dispatch.Http
 
@@ -19,13 +18,13 @@ object MembershipResource extends BetterRestHelper with Extractors {
     case JsonPost("rest" :: "memberships" :: Nil, (json, _)) => createMembership(json)
 
     case JsonGet("rest" :: "memberships" :: email :: Nil, req) =>
-      val realmail = Http -% (email + (if (req.path.suffix.isEmpty) "" else "." + req.path.suffix))
+      val realMail = Http -% (email + (if (req.path.suffix.isEmpty) "" else "." + req.path.suffix))
       (for{
-        person <- Person.find(By(Person.email, realmail)) if person.isMember && person.validated
+        person <- Person.find(By(Person.email, realMail)) if person.isMember && person.validated
       } yield JsonResponse(asJson(person))).or(Full(NotFoundResponse()))
 
     case JsonGet("rest" :: "memberships" :: Nil, _) =>
-      val members = Person.findAll.filter(person => person.isMember && person.validated)
+      val members = Person.findAll().filter(person => person.isMember && person.validated)
       JsonResponse("members" -> JArray(members.map(asJson)))
   }
 
@@ -70,41 +69,3 @@ object MembershipResource extends BetterRestHelper with Extractors {
   }
 }
 
-trait Extractors {
-  object Positive {
-    def unapply[T <: Number](value: T): Option[T] = if (value.doubleValue >= 0.0) Some(value) else None
-  }
-
-  object NonZero {
-    def unapply[T <: Number](value: T): Option[T] = if (value.doubleValue != 0.0) Some(value) else None
-  }
-
-  class Limited(limit: Int) {
-    def unapply[T <: Number](value: T): Option[T] = if (value.doubleValue < limit) Some(value) else None
-  }
-
-  object NotMoreThanThousand extends Limited(1000)
-
-  object ValidEmailAddress {
-    def unapply(value: String): Option[String] = if (MappedEmail.validEmailAddr_?(value)) Some(value) else None
-  }
-}
-
-case class ExplicitBadResponse(description: String) extends LiftResponse with HeaderDefaults {
-  def toResponse = InMemoryResponse(description.getBytes, headers, cookies, 400)
-}
-
-trait BetterRestHelper extends RestHelper {
-  // TODO: Hacked to get right encoding
-  def json(req: Req): Box[JsonAST.JValue] =
-    try {
-      import _root_.java.io._
-      req.body.map(b => JsonParser.parse(new InputStreamReader(new ByteArrayInputStream(b), org.apache.http.protocol.HTTP.UTF_8)))
-    } catch {
-      case e: Exception => Failure(e.getMessage, Full(e), Empty)
-    }
-  protected trait RealJsonBody extends JsonBody {
-    override def body(r: Req): Box[JValue] = json(r)
-  }
-  override protected lazy val JsonPost = new TestPost[JValue] with JsonTest with RealJsonBody
-}

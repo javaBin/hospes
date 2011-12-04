@@ -35,9 +35,9 @@ class Memberships {
         jsCmd = jsCmd & JsCmds.SetHtml(infoFieldId, Text(S.?("added.to.member")))
         person.sendMembershipRenewedConfirmationEmail(buyer)
       }
-      person.save
+      person.save()
       membership.member.set(person.id)
-      membership.save
+      membership.save()
       jsCmd = redrawAll() & jsCmd
     }
     jsCmd
@@ -77,7 +77,7 @@ class Memberships {
       person =>
         <span id={id}>{
           bind("list", template,
-          "memberships" -> bindMemberships(person, redrawAll) _)}
+            "memberships" -> bindMemberships(person, redrawAll) _)}
         </span>
     }.openOr(error("User not available"))
   }

@@ -11,13 +11,13 @@ object Membership extends Membership with LongKeyedMetaMapper[Membership] with C
   def adminPath = "admin"
   def activeMembershipYear = Props.getInt("membership.year") openOr new DateTime().getYear
 
-  def createMany(i: Int, person: Person): Unit = {
+  def createMany(i: Int, person: Person) {
     (0 until i).foreach{
       _ =>
         val membership = Membership.create
         membership.boughtBy.set(person.id)
         membership.year.set(activeMembershipYear)
-        membership.save
+        membership.save()
     }
   }
 }
