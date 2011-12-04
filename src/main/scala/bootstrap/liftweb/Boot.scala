@@ -9,9 +9,10 @@ import net.liftweb.http._
 import net.liftweb.http.auth.{userRoles, HttpBasicAuthentication, AuthRole}
 import net.liftweb.mapper.{Schemifier, DB, StandardDBVendor, DefaultConnectionIdentifier}
 import net.liftweb.sitemap.{SiteMap, Menu, Loc}
-import net.liftweb.common.{Logger, Empty, Full}
 import net.liftweb.util.{LoggingAutoConfigurer, Mailer, Props}
 import javaBin.rest.{MailingListResource, MembershipResource}
+import net.liftweb.sitemap.Loc.If
+import net.liftweb.common.{Logger, Empty, Full}
 
 class Boot {
 
@@ -112,12 +113,15 @@ class Boot {
     LiftRules.dispatch.append(MailingListResource)
     LiftRules.addToPackages("javaBin")
 
+    val mailingListsDefined = If(
+      () => !MailingListEnumeration.values.isEmpty,
+      () => new NotFoundResponse("Mailing lists not defined"))
     val entries =
       (Menu(S.?("home.menu.title")) / "index") ::
       ((Menu("hidden") / "openid" / "form") >> Loc.Hidden) ::
       Person.sitemap :::
       (Menu(S.?("admin.menu.title")) / Membership.adminPath >> Person.loginFirst >> Person.isSuperUser) ::
-      (Menu(S.?("mailing.lists.menu.title")) / MailingListSubscription.mailingListsPath >> Person.loginFirst) ::
+      (Menu(S.?("mailing.lists.menu.title")) / MailingListSubscription.mailingListsPath >> Person.loginFirst >> mailingListsDefined) ::
       (Menu(S.?("memberships.menu.title")) / Membership.membershipsPath >> Person.loginFirst >> Person.isMembershipOwner) ::
       Person.logoutMenuLoc.toList
 
