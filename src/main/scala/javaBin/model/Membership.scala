@@ -3,16 +3,20 @@ package javaBin.model
 import net.liftweb.mapper._
 import java.util.Date
 import org.joda.time.DateTime
+import net.liftweb.util.Props
 
 object Membership extends Membership with LongKeyedMetaMapper[Membership] with CRUDify[Long, Membership] {
+
   def membershipsPath = "memberships"
   def adminPath = "admin"
+  def activeMembershipYear = Props.getInt("membership.year") openOr new DateTime().getYear
 
   def createMany(i: Int, person: Person): Unit = {
     (0 until i).foreach{
       _ =>
         val membership = Membership.create
         membership.boughtBy.set(person.id)
+        membership.year.set(activeMembershipYear)
         membership.save
     }
   }
@@ -32,6 +36,6 @@ class Membership extends LongKeyedMapper[Membership] with IdPK {
   object boughtBy extends LongMappedMapper(this, Person) {
     override def dbColumnName = "bought_by_person_id"
   }
-  def isCurrent = year == currentYear
-  def currentYear = (new DateTime).getYear
+  def isForCurrentYear = year == currentYear
+  private def currentYear = (new DateTime).getYear
 }

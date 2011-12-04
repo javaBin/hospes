@@ -4,3 +4,5 @@ mail.smtp.host=localhost
 
 webshop.user=webshop
 webshop.password=webschopp
+
+membership.year=2012

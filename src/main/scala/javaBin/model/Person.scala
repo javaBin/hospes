@@ -11,11 +11,12 @@ import net.liftweb.http.{TemplateFinder, ForbiddenResponse, S}
 import scala.xml.NodeSeq
 import scala.util.Random
 import scala.math._
+import org.joda.time.DateTime
 
 object Person extends Person with MetaMegaProtoUser[Person] {
   private val forbiddenResponse = () => new ForbiddenResponse("No access")
   val isSuperUser = If(() => Person.currentUser.map(_.superUser.is).openOr(false), forbiddenResponse)
-  val isMembershipOwner = If(() => Person.currentUser.map(user => user.thisYearsBoughtMemberships.size > 0).openOr(false), forbiddenResponse)
+  val isMembershipOwner = If(() => Person.currentUser.map(user => user.membershipsInActiveYear.size > 0).openOr(false), forbiddenResponse)
 
   override def dbTableName = "person"
   override def screenWrap = Full(
@@ -107,12 +108,13 @@ class Person extends MegaProtoUser[Person] with OneToMany[Long, Person] {
   def nameBox = if (firstName.get.isEmpty && lastName.get.isEmpty) Empty else Full(name)
   def mostPresentableName = nameBox.openOr(email.get)
 
-  def thisYearsBoughtMemberships =
+  def membershipsInActiveYear =
     Membership.findAll(
       By(Membership.boughtBy, this.id),
-      By(Membership.year, Membership.currentYear),
+      By(Membership.year, Membership.activeMembershipYear),
       OrderBy(Membership.id, Ascending))
-  def hasActiveMembership = Membership.find(By(Membership.member, this.id), By(Membership.year, Membership.currentYear)) != Empty
+
+  def isMember = Membership.find(By(Membership.member, this.id), By(Membership.year, (new DateTime).getYear)) != Empty
 
   def template(name: String): NodeSeq = TemplateFinder.findAnyTemplate(List("templates-hidden", name)).open_!
 

@@ -21,11 +21,11 @@ object MembershipResource extends BetterRestHelper with Extractors {
     case JsonGet("rest" :: "memberships" :: email :: Nil, req) =>
       val realmail = Http -% (email + (if (req.path.suffix.isEmpty) "" else "." + req.path.suffix))
       (for{
-        person <- Person.find(By(Person.email, realmail)) if person.hasActiveMembership && person.validated
+        person <- Person.find(By(Person.email, realmail)) if person.isMember && person.validated
       } yield JsonResponse(asJson(person))).or(Full(NotFoundResponse()))
 
     case JsonGet("rest" :: "memberships" :: Nil, _) =>
-      val members = Person.findAll.filter(person => person.hasActiveMembership && person.validated)
+      val members = Person.findAll.filter(person => person.isMember && person.validated)
       JsonResponse("members" -> JArray(members.map(asJson)))
   }
 

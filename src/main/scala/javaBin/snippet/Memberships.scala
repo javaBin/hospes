@@ -22,7 +22,7 @@ class Memberships {
       person.email.set(email)
       person
     }
-    if (person.hasActiveMembership) {
+    if (person.isMember) {
       S.error(errorFieldId, S.?("has.active.membership", email))
     } else if (!MappedEmail.validEmailAddr_?(email)) {
       S.error(errorFieldId, S.?("invalid.email.address", email))
@@ -59,7 +59,7 @@ class Memberships {
     }
   }
 
-  def bindMemberships(user: Person, redrawAll: () => JsCmd)(template: NodeSeq): NodeSeq = user.thisYearsBoughtMemberships.flatMap{
+  def bindMemberships(user: Person, redrawAll: () => JsCmd)(template: NodeSeq): NodeSeq = user.membershipsInActiveYear.flatMap{
     membership =>
       val status = membership.member.obj
               .map(person => if (person.validated.is) S.?("membership.status.active") else S.?("membership.status.not.validated"))
