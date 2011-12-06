@@ -1,6 +1,5 @@
 <lift:surround with="defaultWithoutMsgs" at="content">
 
-
   <lift:Admin.createMemberships>
     <h1>Opprett nye javaBin-medlemskap</h1>
     <table>
@@ -33,6 +32,31 @@
     </table>
   </lift:Admin.createMemberships>
 
-  <p><lift:msgs><lift:notice_class>field_notice</lift:notice_class></lift:msgs></p>
+  <lift:Admin.showMembers>
+    <h1>Medlemskap per år</h1>
+    <table>
+      <thead>
+      <tr>
+        <td>År</td>
+        <td>Validerte</td>
+      </tr>
+      </thead>
+      <tbody>
+      <list:years>
+        <tr>
+          <td><members:year/></td>
+          <td><members:validated/></td>
+          <td><members:csvLink/></td>
+        </tr>
+      </list:years>
+      </tbody>
+    </table>
+  </lift:Admin.showMembers>
+
+  <p>
+    <lift:msgs>
+      <lift:notice_class>field_notice</lift:notice_class>
+    </lift:msgs>
+  </p>
 
 </lift:surround>

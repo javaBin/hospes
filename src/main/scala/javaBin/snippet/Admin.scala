@@ -1,14 +1,15 @@
 package javaBin.snippet
 
-import xml.NodeSeq
 import net.liftweb.util.Helpers._
 import net.liftweb.http.{S, SHtml}
 import net.liftweb.http.js.JsCmds
-import javaBin.model.{Person, Membership}
 import net.liftweb.mapper.{By, MappedEmail}
 import net.liftweb.common.Empty
+import javaBin.model.{MembershipCount, Person, Membership}
+import xml.{Text, NodeSeq}
 
 class Admin {
+
   def createMemberships(template: NodeSeq): NodeSeq = {
     var email = ""
     var count = ""
@@ -44,4 +45,23 @@ class Admin {
       "count" -> countField,
       "submit" -> SHtml.ajaxSubmit(S.?("admin.create.memberships.submit"), create))) % ("class" -> "lift-form")
   }
+
+  def showMembers(template: NodeSeq): NodeSeq = {
+    val membershipCounts = Membership.countPerYear
+    if (membershipCounts.size > 0)
+      bind("list", template, "years" -> showMembersPerYear(membershipCounts) _)
+    else
+      NodeSeq.Empty
+  }
+
+  protected def showMembersPerYear(membershipCounts: List[MembershipCount])(template: NodeSeq): NodeSeq =
+    membershipCounts.flatMap(membershipCount => listYears(membershipCount)(template))
+
+  protected def listYears(membershipCount: MembershipCount)(template: NodeSeq): NodeSeq = {
+    bind("members", template,
+      "year" -> Text(membershipCount.year.toString),
+      "validated" -> Text(membershipCount.validatedCount.toString),
+      "csvLink" -> Text(""))
+  }
+
 }
