@@ -141,6 +141,8 @@ class Person extends MegaProtoUser[Person] with OneToMany[Long, Person] {
 
   def isMember = Membership.find(By(Membership.member, this.id), By(Membership.year, (new DateTime).getYear)) != Empty
 
+  def isInActiveMembershipYear = Membership.find(By(Membership.member, this.id), By(Membership.year, Membership.activeMembershipYear)) != Empty
+
   def template(name: String): NodeSeq = TemplateFinder.findAnyTemplate(List("templates-hidden", name)).open_!
 
   def sendMembershipRenewedConfirmationEmail(other: Person) {

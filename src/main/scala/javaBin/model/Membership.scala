@@ -20,6 +20,11 @@ object Membership extends Membership with LongKeyedMetaMapper[Membership] with C
         membership.save()
     }
   }
+  
+  def lastMemberYearsBoughtMemberships: List[Membership] =
+    Person.currentUser.map{
+      currentUser => Membership.findAll(By(boughtBy, currentUser.id), By(year, activeMembershipYear - 1))
+    }.openOr(Nil)
 }
 
 class Membership extends LongKeyedMapper[Membership] with IdPK {
