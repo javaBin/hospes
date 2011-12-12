@@ -24,7 +24,7 @@ class Memberships {
       person.email.set(email)
       person
     }
-    if (person.isMember) {
+    if (person.isMemberInActiveMembershipYear) {
       S.error(errorFieldId, S.?("has.active.membership", email))
     } else if (!MappedEmail.validEmailAddr_?(email)) {
       S.error(errorFieldId, S.?("invalid.email.address", email))
@@ -54,9 +54,14 @@ class Memberships {
     }.openOr {
       val emailSuggestion = Box(lastYearMembership).flatMap(_.member.obj).map(_.email.is).openOr("")
       var currentEmail = membership.member.obj.map(_.email.get).openOr(emailSuggestion)
+      val info = for {
+        membership <- Box(lastYearMembership)
+        member <- membership.member
+      } yield S.?("membership.reapply.q", member.mostPresentableName)
       SHtml.ajaxForm(bind("form", template,
         "email" -> SHtml.text(currentEmail, currentEmail = _),
         "submit" -> SHtml.ajaxSubmit(S.?("save"), () => submitMember(currentEmail, errorFieldId, infoFieldId, membership, redrawAll)),
+        "info" -> info.openOr(""),
         AttrBindParam("errorId", errorFieldId, "id"),
         AttrBindParam("infoId", infoFieldId, "id")))
     }
@@ -85,7 +90,7 @@ class Memberships {
       person =>
         val id = Helpers.nextFuncName
         def redrawAll(): JsCmd = JsCmds.Replace(id, render(template))
-        val lastYearsMemberships = Membership.lastMemberYearsBoughtMemberships.filter(_.member.obj.map(!_.isInActiveMembershipYear).openOr(false))
+        val lastYearsMemberships = Membership.lastMemberYearsBoughtMemberships.filter(_.member.obj.map(!_.isMemberInActiveMembershipYear).openOr(false))
         <span id={id}>
           {bind("list", template,
           "memberships" -> bindMemberships(person, lastYearsMemberships, redrawAll) _)}

@@ -43,7 +43,6 @@ class Boot {
           memberships2011P1(personNumber - 20).member(person.id).save()
         }
     }
-    Membership.findAll().foreach(println _) // TODO
   }
 
   def restAuthenticationSetup() {
