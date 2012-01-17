@@ -31,6 +31,15 @@ trait BetterRestHelper extends RestHelper {
       r.weightedAccept.find(_.matches("text" -> "csv")).isDefined || r.weightedAccept.isEmpty ||
               (r.weightedAccept.isEmpty && r.path.suffix.equalsIgnoreCase("csv"))
   }
+  
+  object AnInt {
+    def unapply(s: String): Option[Int] = 
+      try {
+        Some(s.toInt)
+      } catch {
+        case e: NumberFormatException => None
+      }
+  }
 
 }
 

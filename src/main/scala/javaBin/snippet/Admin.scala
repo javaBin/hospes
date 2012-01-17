@@ -58,10 +58,11 @@ class Admin {
     membershipCounts.flatMap(membershipCount => listYears(membershipCount)(template))
 
   protected def listYears(membershipCount: MembershipCount)(template: NodeSeq): NodeSeq = {
+    val yearString = membershipCount.year.toString
     bind("members", template,
-      "year" -> Text(membershipCount.year.toString),
+      "year" -> Text(yearString),
       "validated" -> Text(membershipCount.validatedCount.toString),
-      "csvLink" -> Text(""))
+      "csvLink" -> <a target="_blank" href={S.hostAndPath + List("rest", "memberships", "year", yearString).mkString("/", "/", "")}>csv</a>)
   }
 
 }

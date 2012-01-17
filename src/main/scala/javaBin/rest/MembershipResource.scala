@@ -26,6 +26,9 @@ object MembershipResource extends BetterRestHelper with Extractors {
     case JsonGet("rest" :: "memberships" :: Nil, _) =>
       val members = Person.findAll().filter(person => person.isMember && person.validated)
       JsonResponse("members" -> JArray(members.map(asJson)))
+
+    case CsvGet("rest" :: "memberships" :: "year" :: AnInt(year) :: Nil, _) =>
+      CsvResponse(Membership.memberReportForYear(year))
   }
 
   def asJson(person:Person):JValue =

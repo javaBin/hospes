@@ -46,6 +46,18 @@ object Membership extends Membership with LongKeyedMetaMapper[Membership] with C
       case _ => error("Unexpected output " + yearRow)
     }
   }
+
+  def memberReportForYear(year: Int) = {
+    val (head, resultList) = DB.runQuery(" select " +
+            List(
+              List(id, this.year, member, boughtDate, boughtBy).map(_.dbColumnName).mkString("m.", ", m.", ""),
+              List(Person.id, Person.email, Person.firstName, Person.lastName, Person.address, Person.phoneNumber).map(_.dbColumnName).mkString("p.", ", p.", "")
+            ).mkString(", ") +
+      " from " + dbTableName + " m" +
+      " inner join " + Person.dbTableName + " p on m." + member.dbColumnName + " = p." + Person.id.dbColumnName +
+      " where m." + this.year.dbColumnName + " = " + year)
+    List(head) ::: resultList
+  }
 }
 
 case class MembershipCount(year: Int, validatedCount: Int)
