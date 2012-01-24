@@ -7,6 +7,7 @@ import net.liftweb.json.JsonAST.JValue
 import net.liftweb.common.{Full, Failure, Empty, Box}
 import net.liftweb.http.provider.HTTPCookie
 import net.liftweb.http._
+import org.apache.commons.httpclient.HttpStatus
 
 trait BetterRestHelper extends RestHelper {
   // TODO: Hacked to get right encoding
@@ -35,7 +36,7 @@ trait BetterRestHelper extends RestHelper {
 }
 
 object CsvResponse {
-  def apply(content: List[List[String]]) = new CsvResponse(content, S.getHeaders(Nil), S.responseCookies, 200)
+  def apply(content: List[List[String]]) = new CsvResponse(content, S.getHeaders(Nil), S.responseCookies, HttpStatus.SC_ACCEPTED)
 }
 
 case class CsvResponse(content: List[List[String]], headers: List[(String, String)], cookies: List[HTTPCookie], code: Int) extends LiftResponse {
@@ -68,5 +69,5 @@ trait Extractors {
 }
 
 case class ExplicitBadResponse(description: String) extends LiftResponse with HeaderDefaults {
-  def toResponse = InMemoryResponse(description.getBytes, headers, cookies, 400)
+  def toResponse = InMemoryResponse(description.getBytes, headers, cookies, HttpStatus.SC_BAD_REQUEST)
 }
