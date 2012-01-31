@@ -21,8 +21,15 @@ object MailingListResource extends BetterRestHelper {
 
     case Get("rest" :: "mailingLists" :: mailingListName :: _ :: Nil, req) => {
       val email = getName(req)
-      Box(MailingListEnumeration.find(mailingListName)).flatMap{_ =>
-        Person.find(By(Person.email, email)).map(_ => new NoContentResponse()).or(Full(new NotFoundResponse("User with email " + email + " not found")))
+      Box(MailingListEnumeration.find(mailingListName)).flatMap {
+        _ =>
+          Person.find(By(Person.email, email)).map {
+            person: Person =>
+              if (person.mailingList(mailingListName).checked.is)
+                new NoContentResponse()
+              else
+                new NotFoundResponse("User with email " + email + " not found in mailinglist " + mailingListName)
+          }.or(Full(new NotFoundResponse("User with email " + email + " not found")))
       }.or(Full(new NotFoundResponse("Mailing list " + mailingListName + " does not exist")))
     }
 

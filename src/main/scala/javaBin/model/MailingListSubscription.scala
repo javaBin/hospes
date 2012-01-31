@@ -6,7 +6,7 @@ object MailingListSubscription extends MailingListSubscription with LongKeyedMet
   val mailingListsPath = "mailing_lists"
 
   def findSubscribers(mailingListValue: MailingListEnumeration.Value): List[MailingListSubscription] =
-    MailingListSubscription.findAll(By(mailingList, mailingListValue.toString), By(checked, true))
+    MailingListSubscription.findAll(By(mailingList, mailingListValue.name), By(checked, true))
 }
 
 class MailingListSubscription extends LongKeyedMapper[MailingListSubscription] with IdPK {
