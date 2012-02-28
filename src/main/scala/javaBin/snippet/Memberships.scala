@@ -80,6 +80,7 @@ class Memberships {
                 .openOr(S.?("membership.status.unassigned"))
         bind("membership", template,
           "boughtDate" -> dateTimeFormatter.print(new DateTime(membership.boughtDate.get)),
+          "name" -> Text(membership.member.obj.flatMap(_.nameBox).openOr("-")),
           "status" -> Text(status),
           "form" -> bindForm(membership, lastYearsMembership, redrawAll) _)
     })
