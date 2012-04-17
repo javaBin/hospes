@@ -24,7 +24,9 @@ class Memberships {
       person.email.set(email)
       person
     }
-    if (person.isMemberInActiveMembershipYear) {
+    if (membership.member.obj.map(_ == person).openOr(false)) {
+      // Ignore; same person
+    } else if (person.isMemberInActiveMembershipYear) {
       S.error(errorFieldId, S.?("has.active.membership", email))
     } else if (!MappedEmail.validEmailAddr_?(email)) {
       S.error(errorFieldId, S.?("invalid.email.address", email))
