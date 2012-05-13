@@ -33,7 +33,7 @@ class MailingLists {
           bind("list", template,
             "mailingList" -> bindMailingLists(person, redrawAll) _)
         }</span>
-    }.openOr(error("User not available"))
+    }.openOr(sys.error("User not available"))
   }
 
 }

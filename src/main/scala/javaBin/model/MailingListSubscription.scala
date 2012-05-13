@@ -20,7 +20,7 @@ class MailingListSubscription extends LongKeyedMapper[MailingListSubscription] w
     override def dbColumnName = "mailing_list_id"
   }
 
-  object member extends LongMappedMapper(this, Person) {
+  object member extends MappedLongForeignKey(this, Person) {
     override def dbColumnName = "member_person_id"
   }
 

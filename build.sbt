@@ -45,3 +45,6 @@ libraryDependencies += "org.scala-tools.testing" %% "specs" % "1.6.9" % "test"
 libraryDependencies += "javax.servlet" % "servlet-api" % "2.5" % "test"
 
 unmanagedClasspath in Test <+= (baseDirectory) map { bd => Attributed.blank(bd / "src/main/webapp") }
+
+
+scalacOptions += "-deprecation"

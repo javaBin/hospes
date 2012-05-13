@@ -7,11 +7,11 @@ object MailingListEnumeration {
   private val map = Props.get("mailing.lists", "").split(",").map(_.trim).filter(!_.isEmpty).map(_.toInt).map {
     index =>
       val propertyName = "mailing.list." + index
-      val name = Props.get(propertyName).openOr(error("Missing mailing-list with property " + propertyName))
+      val name = Props.get(propertyName).openOr(sys.error("Missing mailing-list with property " + propertyName))
       val propertyTitle = "mailing.list." + name
-      val title = Props.get(propertyTitle).openOr(error("Missing mailing-list title with property " + propertyTitle))
+      val title = Props.get(propertyTitle).openOr(sys.error("Missing mailing-list title with property " + propertyTitle))
       (name -> Value(index, name, title))
-  } toMap
+  }.toMap
 
   def find(listName: String): Option[Value] = map.get(listName)
 

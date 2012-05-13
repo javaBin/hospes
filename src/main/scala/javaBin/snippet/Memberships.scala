@@ -99,6 +99,6 @@ class Memberships {
           {bind("list", template,
           "memberships" -> bindMemberships(person, lastYearsMemberships, redrawAll) _)}
         </span>
-    }.openOr(error("User not available"))
+    }.openOr(sys.error("User not available"))
 
 }
