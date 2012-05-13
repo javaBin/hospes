@@ -16,7 +16,7 @@ import java.util.concurrent.{TimeUnit, CountDownLatch}
 import javax.mail.Message.RecipientType
 import net.liftweb.http._
 
-object MembershipResourceSpec extends Specification {
+class MembershipResourceSpec extends Specification {
   Props.mode
   Boot.databaseSetup()
 

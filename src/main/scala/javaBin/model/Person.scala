@@ -7,7 +7,7 @@ import net.liftweb.sitemap.Loc._
 import net.liftweb.util.{Props, Mailer}
 import net.liftweb.util.Mailer._
 import net.liftweb.util.Helpers._
-import net.liftweb.http.{TemplateFinder, ForbiddenResponse, S}
+import net.liftweb.http.{Templates, ForbiddenResponse, S}
 import scala.xml.NodeSeq
 import scala.util.Random
 import scala.math._
@@ -143,7 +143,7 @@ class Person extends MegaProtoUser[Person] with OneToMany[Long, Person] {
 
   def isMemberInActiveMembershipYear = Membership.find(By(Membership.member, this.id), By(Membership.year, Membership.activeMembershipYear)) != Empty
 
-  def template(name: String): NodeSeq = TemplateFinder.findAnyTemplate(List("templates-hidden", name)).open_!
+  def template(name: String): NodeSeq = Templates(List("templates-hidden", name)).open_!
 
   def sendMembershipRenewedConfirmationEmail(other: Person) {
     val editPath = S.hostAndPath + Person.editPath.mkString("/", "/", "")

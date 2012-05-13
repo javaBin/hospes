@@ -41,4 +41,4 @@ libraryDependencies += "org.scala-tools.testing" %% "specs" % "1.6.9" % "test"
 
 libraryDependencies += "org.eclipse.jetty" % "jetty-webapp" % "7.3.0.v20110203" % "container"
 
-
+unmanagedClasspath in Test <+= (baseDirectory) map { bd => Attributed.blank(bd / "src/main/webapp") }
