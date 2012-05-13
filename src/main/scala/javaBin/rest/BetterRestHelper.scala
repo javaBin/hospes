@@ -23,6 +23,16 @@ trait BetterRestHelper extends RestHelper {
     override def body(r: Req): Box[JValue] = json(r)
   }
 
+  /**
+   * Overridden to make sure wrong suffix does not hinder json acceptence
+   */
+  override protected def jsonResponse_?(in: Req): Boolean = {
+    (in.acceptsJson_? && !in.acceptsStarStar) ||
+    ((in.weightedAccept.isEmpty ||
+      in.acceptsStarStar) && defaultGetAsJson) ||
+    suplimentalJsonResponse_?(in)
+  }
+
   override protected lazy val JsonPost = new TestPost[JValue] with JsonTest with RealJsonBody
 
   protected lazy val CsvGet = new TestGet with CsvTest

@@ -37,8 +37,11 @@ libraryDependencies += "net.sourceforge.nekohtml" % "nekohtml" % "1.9.10"
 
 libraryDependencies += "commons-httpclient" % "commons-httpclient" % "3.1"
 
+libraryDependencies += "org.eclipse.jetty" % "jetty-webapp" % "7.3.0.v20110203" % "container"
+
+
 libraryDependencies += "org.scala-tools.testing" %% "specs" % "1.6.9" % "test"
 
-libraryDependencies += "org.eclipse.jetty" % "jetty-webapp" % "7.3.0.v20110203" % "container"
+libraryDependencies += "javax.servlet" % "servlet-api" % "2.5" % "test"
 
 unmanagedClasspath in Test <+= (baseDirectory) map { bd => Attributed.blank(bd / "src/main/webapp") }
