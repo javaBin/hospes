@@ -48,7 +48,7 @@ object Membership extends Membership with LongKeyedMetaMapper[Membership] with C
       println("results: " + member)
     for (yearRow <- resultList) yield yearRow match {
       case List(AnInt(year), AnInt(validatedCount)) => MembershipCount(year, validatedCount)
-      case _ => error("Unexpected output " + yearRow)
+      case _ => sys.error("Unexpected output " + yearRow)
     }
   }
 
