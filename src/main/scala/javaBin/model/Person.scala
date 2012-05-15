@@ -7,7 +7,7 @@ import net.liftweb.sitemap.Loc._
 import net.liftweb.util.{Props, Mailer}
 import net.liftweb.util.Mailer._
 import net.liftweb.util.Helpers._
-import net.liftweb.http.{TemplateFinder, ForbiddenResponse, S}
+import net.liftweb.http.{Templates, ForbiddenResponse, S}
 import scala.xml.NodeSeq
 import scala.util.Random
 import scala.math._
@@ -114,7 +114,7 @@ class Person extends MegaProtoUser[Person] with OneToMany[Long, Person] {
   def nameBox = if (firstName.get.isEmpty && lastName.get.isEmpty) Empty else Full(name)
   def mostPresentableName = nameBox.openOr(email.get)
 
-  def mailingList(mailingListName: String) = {
+  def mailingList(mailingListName: String): MailingListSubscription = {
     MailingListSubscription.findAll(
       By(MailingListSubscription.member, this.id),
       By(MailingListSubscription.mailingList, mailingListName)
@@ -127,8 +127,8 @@ class Person extends MegaProtoUser[Person] with OneToMany[Long, Person] {
     val existing = MailingListSubscription.findAll(By(MailingListSubscription.member, this.id))
     MailingListEnumeration.values.toList.map {
       value =>
-        existing.find(_.mailingList.is == value.toString).getOrElse {
-          MailingListSubscription.create.member(this).mailingList(value.toString)
+        existing.find(_.mailingList.is == value.name).getOrElse {
+          MailingListSubscription.create.member(this).mailingList(value.name)
         }
     }
   }
@@ -141,7 +141,9 @@ class Person extends MegaProtoUser[Person] with OneToMany[Long, Person] {
 
   def isMember = Membership.find(By(Membership.member, this.id), By(Membership.year, (new DateTime).getYear)) != Empty
 
-  def template(name: String): NodeSeq = TemplateFinder.findAnyTemplate(List("templates-hidden", name)).open_!
+  def isMemberInActiveMembershipYear = Membership.find(By(Membership.member, this.id), By(Membership.year, Membership.activeMembershipYear)) != Empty
+
+  def template(name: String): NodeSeq = Templates(List("templates-hidden", name)).open_!
 
   def sendMembershipRenewedConfirmationEmail(other: Person) {
     val editPath = S.hostAndPath + Person.editPath.mkString("/", "/", "")

@@ -34,7 +34,7 @@ class Admin {
         jsCmd = jsCmd & JsCmds.Replace(countErrorId, NodeSeq.Empty)
       }
       if (S.errors.isEmpty) {
-        Membership.createMany(count.toInt, Person.find(By(Person.email, email)).openOr(error("User " + email + " not found")))
+        Membership.createMany(count.toInt, Person.find(By(Person.email, email)).openOr(sys.error("User " + email + " not found")))
         S.notice(S.?("admin.created.memberships", count.toInt, email))
         jsCmd = jsCmd & JsCmds.Replace("email", emailField) & JsCmds.Replace("count", countField)
       }

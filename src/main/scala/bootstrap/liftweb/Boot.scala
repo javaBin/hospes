@@ -17,7 +17,11 @@ import net.liftweb.common.{Logger, Empty, Full}
 class Boot {
 
   def testModePopulate() {
-    (0 to 10).map{
+    val memberships2011P0 = for (i <- 0 until 12) yield Membership.create.year(2011).saveMe()
+    val memberships2012P0 = for (i <- 0 until 15) yield Membership.create.year(2012).saveMe()
+    val memberships2011P1 = for (i <- 0 until 10) yield Membership.create.year(2011).saveMe()
+    val memberships2012P1 = for (i <- 0 until 8) yield Membership.create.year(2012).saveMe()
+    (0 until 30).map{
       personNumber =>
         val person = Person.create
         val personName = "Person" + personNumber
@@ -28,17 +32,16 @@ class Boot {
             .superUser(personNumber == 1)
             .validated(personNumber != 2)
             .save()
-        if (personNumber == 0 || personNumber == 1) {
-          (0 to 10).foreach {
-            index =>
-              val membership = Membership.create
-              membership.year(if (personNumber == 0) 2012 else 2011).boughtBy(person.id)
-              if (index == 0)
-                membership.member(person.id)
-              membership.save()
-          }
+        if (personNumber == 0) {
+          (memberships2011P0 ++ memberships2012P0).map(_.boughtBy(person.id).save())
+        } else if (personNumber == 1) {
+          (memberships2011P1 ++ memberships2012P1).map(_.boughtBy(person.id).save())
         }
-        person
+        if (personNumber >= 10 && personNumber < 20) {
+          memberships2011P0(personNumber - 10).member(person.id).save()
+        } else if (personNumber >= 20 && personNumber < 30) {
+          memberships2011P1(personNumber - 20).member(person.id).save()
+        }
     }
   }
 

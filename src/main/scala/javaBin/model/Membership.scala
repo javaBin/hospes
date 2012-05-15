@@ -23,6 +23,11 @@ object Membership extends Membership with LongKeyedMetaMapper[Membership] with C
     }
   }
 
+  def lastMemberYearsBoughtMemberships: List[Membership] =
+    Person.currentUser.map{
+      currentUser => Membership.findAll(By(boughtBy, currentUser.id), By(year, activeMembershipYear - 1))
+    }.openOr(Nil)
+
   object AnInt {
     def unapply(s: String): Option[Int] = try {
       Some(s.toInt)
@@ -68,16 +73,14 @@ class Membership extends LongKeyedMapper[Membership] with IdPK {
   object year extends MappedInt(this) {
     override def defaultValue = currentYear
   }
-
-  object member extends LongMappedMapper(this, Person) {
+  object member extends MappedLongForeignKey(this, Person) {
     override def dbColumnName = "member_person_id"
   }
 
   object boughtDate extends MappedDateTime(this) {
     override def defaultValue = new Date
   }
-
-  object boughtBy extends LongMappedMapper(this, Person) {
+  object boughtBy extends MappedLongForeignKey(this, Person) {
     override def dbColumnName = "bought_by_person_id"
   }
 

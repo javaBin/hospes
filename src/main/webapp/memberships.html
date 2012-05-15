@@ -3,9 +3,10 @@
   <lift:memberships>
     <table>
       <thead>
-      <td width="60%">Epostadresse</td>
-      <td width="20%">Kjøpt</td>
-      <td width="20%">Status</td>
+      <td width="50%">Epostadresse</td>
+      <td width="20%">Navn</td>
+      <td width="15%">Kjøpt</td>
+      <td width="15%">Status</td>
       </thead>
       <list:memberships>
         <tr>
@@ -16,7 +17,11 @@
               <br/>
               <span form:errorId=" " class="field_error"></span>
               <span form:infoId=" " class="field_info"></span>
+              <form:info/>
             </membership:form>
+          </td>
+          <td>
+            <membership:name/>
           </td>
           <td>
             <membership:boughtDate/>

@@ -61,16 +61,16 @@ class OpenIdIntegration(loginFormUrl: String) {
   }
 
   def processCheckidSetup(context: String, person: Person, request: ParameterList): Box[LiftResponse] = {
-    val authReq = AuthRequest.createAuthRequest(request, manager.getRealmVerifier())
+    val authReq = AuthRequest.createAuthRequest(request, manager.getRealmVerifier)
 
     val openIdUrl = context + "/openid/id/" + person.openIdKey.get
     println("AuthReq")
-    println("OPEndpoint = " + authReq.getOPEndpoint())
-    println("Identity   = " + authReq.getIdentity())
-    println("Claimed    = " + authReq.getClaimed())
-    println("Handle     = " + authReq.getHandle())
-    println("ReturnTo   = " + authReq.getReturnTo())
-    println("Realm      = " + authReq.getRealm())
+    println("OPEndpoint = " + authReq.getOPEndpoint)
+    println("Identity   = " + authReq.getIdentity)
+    println("Claimed    = " + authReq.getClaimed)
+    println("Handle     = " + authReq.getHandle)
+    println("ReturnTo   = " + authReq.getReturnTo)
+    println("Realm      = " + authReq.getRealm)
 
     val userSelId       = openIdUrl
     val userSelClaimed  = openIdUrl // authReq.getIdentity()
@@ -96,8 +96,8 @@ class OpenIdIntegration(loginFormUrl: String) {
       if (ext.isInstanceOf[FetchRequest]) {
         val req = ext.asInstanceOf[FetchRequest]
 
-        val requiredAttributes = asScalaMap(req.getAttributes(true).asInstanceOf[java.util.Map[String, String]])
-        val optionalAttributes = asScalaMap(req.getAttributes(false).asInstanceOf[java.util.Map[String, String]])
+        val requiredAttributes = mapAsScalaMap(req.getAttributes(true).asInstanceOf[java.util.Map[String, String]])
+        val optionalAttributes = mapAsScalaMap(req.getAttributes(false).asInstanceOf[java.util.Map[String, String]])
 
         println("FetchRequest")
         println("Required:")
@@ -122,7 +122,7 @@ class OpenIdIntegration(loginFormUrl: String) {
 
         val v2 = requiredValues.map(t => (t._1, t._2.get)) ++
               optionalValues.filter(_._2.isDefined).map(t => (t._1, t._2.get))
-        response.addExtension(createFetchResponse(req, asJavaMap(v2)))
+        response.addExtension(createFetchResponse(req, mutableMapAsJavaMap(v2)))
       }
       else {
         return Full(InternalServerErrorResponse())
@@ -134,8 +134,8 @@ class OpenIdIntegration(loginFormUrl: String) {
       if (ext.isInstanceOf[SRegRequest]) {
         val req = ext.asInstanceOf[SRegRequest];
 
-        val requiredAttributes = asScalaMap(req.getAttributes(true).asInstanceOf[java.util.Map[String, String]])
-        val optionalAttributes = asScalaMap(req.getAttributes(false).asInstanceOf[java.util.Map[String, String]])
+        val requiredAttributes = mapAsScalaMap(req.getAttributes(true).asInstanceOf[java.util.Map[String, String]])
+        val optionalAttributes = mapAsScalaMap(req.getAttributes(false).asInstanceOf[java.util.Map[String, String]])
 
         println("SRegRequest")
         println("Required:")
@@ -159,7 +159,7 @@ class OpenIdIntegration(loginFormUrl: String) {
 
         val v2 = requiredValues.map(t => (t._1, t._2.get)) ++
               optionalValues.filter(_._2.isDefined).map(t => (t._1, t._2.get))
-        response.addExtension(createSRegResponse(req, asJavaMap(v2)))
+        response.addExtension(createSRegResponse(req, mutableMapAsJavaMap(v2)))
       }
       else {
         return Full(InternalServerErrorResponse())
@@ -177,7 +177,7 @@ class OpenIdIntegration(loginFormUrl: String) {
   }
 
   implicit def reqToParameterList(req: Req): ParameterList = {
-    val parameterMap: java.util.Map[String, Array[String]] = asJavaMap(req.params.map((t:(String, List[String])) => (t._1, t._2.toArray)))
+    val parameterMap: java.util.Map[String, Array[String]] = mapAsJavaMap(req.params.map((t:(String, List[String])) => (t._1, t._2.toArray)))
     new ParameterList(parameterMap)
   }
 
@@ -209,13 +209,13 @@ class OpenIdIntegration(loginFormUrl: String) {
         Full(OkResponse())
       case GetRequest =>
         val xml = generateClaimedIdentifierXrds(req.hostAndPath)
-        Full(InMemoryResponse(xml.toString.getBytes("utf-8"), List(xrds), Nil, 200))
+        Full(InMemoryResponse(xml.toString().getBytes("utf-8"), List(xrds), Nil, 200))
       case PostRequest =>
         println(method.method + " openid/id/" + key)
         println("query=" + req.request.queryString)
         req.headers.foreach(t => println(t._1 + ": " + t._2))
         val xml = generateClaimedIdentifierXrds(req.hostAndPath)
-        Full(InMemoryResponse(xml.toString.getBytes("utf-8"), List(xrds), Nil, 200))
+        Full(InMemoryResponse(xml.toString().getBytes("utf-8"), List(xrds), Nil, 200))
       case _ =>
         println("openid/id/" + key + ": Unknown request: method=" + method.method)
         println(method.method + " openid/id/" + key)
@@ -281,7 +281,7 @@ class OpenIdIntegration(loginFormUrl: String) {
               Full(MethodNotAllowedResponse())
             case _ =>
               val xml = generateClaimedIdentifierXrds(req.hostAndPath)
-              Full(InMemoryResponse(xml.toString.getBytes("utf-8"), List(xrds), Nil, 200))
+              Full(InMemoryResponse(xml.toString().getBytes("utf-8"), List(xrds), Nil, 200))
           }
       }
 
@@ -313,7 +313,7 @@ class OpenIdIntegration(loginFormUrl: String) {
       Full(MethodNotAllowedResponse())
   }
 
-  def missingOpenIdSession() = {
+  def missingOpenIdSession = {
     val msg = "No active OpenId session. Please go back to the application came from and try again."
     Full(InMemoryResponse(msg.getBytes("utf-8"), List(plainText), Nil, 404))
   }
