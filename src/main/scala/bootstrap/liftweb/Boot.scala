@@ -19,8 +19,10 @@ class Boot {
   def testModePopulate() {
     val memberships2011P0 = for (i <- 0 until 12) yield Membership.create.year(2011).saveMe()
     val memberships2012P0 = for (i <- 0 until 15) yield Membership.create.year(2012).saveMe()
+    val memberships2013P0 = for (i <- 0 until 11) yield Membership.create.year(2013).saveMe()
     val memberships2011P1 = for (i <- 0 until 10) yield Membership.create.year(2011).saveMe()
     val memberships2012P1 = for (i <- 0 until 8) yield Membership.create.year(2012).saveMe()
+    val memberships2013P1 = for (i <- 0 until 9) yield Membership.create.year(2013).saveMe()
     (0 until 30).map{
       personNumber =>
         val person = Person.create
@@ -33,9 +35,9 @@ class Boot {
             .validated(personNumber != 2)
             .save()
         if (personNumber == 0) {
-          (memberships2011P0 ++ memberships2012P0).map(_.boughtBy(person.id).save())
+          (memberships2011P0 ++ memberships2012P0 ++ memberships2013P0).map(_.boughtBy(person.id).save())
         } else if (personNumber == 1) {
-          (memberships2011P1 ++ memberships2012P1).map(_.boughtBy(person.id).save())
+          (memberships2011P1 ++ memberships2012P1 ++ memberships2013P1).map(_.boughtBy(person.id).save())
         }
         if (personNumber >= 10 && personNumber < 20) {
           memberships2011P0(personNumber - 10).member(person.id).save()
@@ -64,6 +66,7 @@ class Boot {
 
     LiftRules.httpAuthProtectedResource.append {
       case Req("rest" :: "mailingLists" :: _, _, _) => Full(mailingListRole)
+//      case Req("rest" :: "mamberships" :: year :: _, _, _) =>
       case Req("rest" :: "memberships" :: _, _, _) => Full(webshopRole)
     }
   }
@@ -114,6 +117,7 @@ class Boot {
 
     LiftRules.dispatch.append(MembershipResource)
     LiftRules.dispatch.append(MailingListResource)
+//    LiftRules.statelessDispatchTable.append(MembershipResource)
     LiftRules.addToPackages("javaBin")
 
     val mailingListsDefined = If(
