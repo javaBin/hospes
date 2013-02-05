@@ -24,7 +24,9 @@ class Memberships {
       person.email.set(email)
       person
     }
-    if (person.isMemberInActiveMembershipYear) {
+    if (membership.member.obj.map(_ == person).openOr(false)) {
+      // Ignore; same person
+    } else if (person.isMemberInActiveMembershipYear) {
       S.error(errorFieldId, S.?("has.active.membership", email))
     } else if (!MappedEmail.validEmailAddr_?(email)) {
       S.error(errorFieldId, S.?("invalid.email.address", email))
@@ -58,9 +60,10 @@ class Memberships {
         membership <- Box(lastYearMembership)
         member <- membership.member
       } yield S.?("membership.reapply.q", member.mostPresentableName)
+      val saveButtonText = membership.member.obj.map(_ => S.?("change")).openOr(S.?("save"))
       SHtml.ajaxForm(bind("form", template,
         "email" -> SHtml.text(currentEmail, currentEmail = _),
-        "submit" -> SHtml.ajaxSubmit(S.?("save"), () => submitMember(currentEmail, errorFieldId, infoFieldId, membership, redrawAll)),
+        "submit" -> SHtml.ajaxSubmit(saveButtonText, () => submitMember(currentEmail, errorFieldId, infoFieldId, membership, redrawAll)),
         "info" -> info.openOr(""),
         AttrBindParam("errorId", errorFieldId, "id"),
         AttrBindParam("infoId", infoFieldId, "id")))
@@ -80,6 +83,7 @@ class Memberships {
                 .openOr(S.?("membership.status.unassigned"))
         bind("membership", template,
           "boughtDate" -> dateTimeFormatter.print(new DateTime(membership.boughtDate.get)),
+          "name" -> Text(membership.member.obj.flatMap(_.nameBox).openOr("-")),
           "status" -> Text(status),
           "form" -> bindForm(membership, lastYearsMembership, redrawAll) _)
     })
@@ -95,6 +99,6 @@ class Memberships {
           {bind("list", template,
           "memberships" -> bindMemberships(person, lastYearsMemberships, redrawAll) _)}
         </span>
-    }.openOr(error("User not available"))
+    }.openOr(sys.error("User not available"))
 
 }

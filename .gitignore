@@ -3,6 +3,9 @@
 *.ipr
 *.iws
 .idea/*
+.history
+.classpath
+.project
 target
 lib_managed
 project/boot

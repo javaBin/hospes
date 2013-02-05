@@ -4,7 +4,6 @@ package rest
 import util.CreateMembers
 import model.{Membership, Person}
 
-import org.specs.Specification
 import org.specs.matcher.Matcher
 
 import bootstrap.liftweb.Boot
@@ -15,8 +14,9 @@ import javax.mail.internet.MimeMessage
 import java.util.concurrent.{TimeUnit, CountDownLatch}
 import javax.mail.Message.RecipientType
 import net.liftweb.http._
+import net.liftweb.mockweb.WebSpec
 
-object MembershipResourceSpec extends Specification {
+class MembershipResourceSpec extends WebSpec {
   Props.mode
   Boot.databaseSetup()
 
@@ -96,35 +96,36 @@ object MembershipResourceSpec extends Specification {
   "looking up memberships" should {
     setSequential()
 
-    def req(path: List[String]) = new Req(
-      ParsePath(path, "", false, false), "", GetRequest, Empty, null,
-      System.nanoTime, System.nanoTime, false,
-      () => ParamCalcInfo(Nil, Map.empty, Nil, Empty), Map())
+    val email = "membershiptest@eventsystems.no"
+    var person = Person.create.email(email).firstName("firstname").lastName("lastName").validated(true).password("xxxxxx").saveMe()
 
+    def response(req: Req) = MembershipResource(req)().open_!.toResponse.code
 
-    def response(email: String) = MembershipResource(req(List("rest", "memberships", email)))().open_!.toResponse.code
-
-    val email = "membershiptest@eventsystems.com"
-    var person = Person.create.email(email).firstName("firstname").lastName("lastName").validated(true).password("xxxxxx").saveMe
-
-    "return 404 for unknown person" in {
-      response("unknown@man.no") must_== 404
+    "return 404 for unknown person" withReqFor("/rest/memberships/unknown@man.no") in { req =>
+      response(req) must_== 404
     }
 
-    "return 404 for known person without membership" in {
-      response(email) must_== 404
+    "return 404 for known person without membership" withReqFor("/rest/memberships/" + email) in { req =>
+      response(req) must_== 404
     }
 
-    "return 404 for known person with unverified membership" in {
-      val unverifiedEmail = "membershiptest@eventsystems.kom"
-      var unverifiedPerson = Person.create.email(unverifiedEmail).firstName("firstname").lastName("lastName").password("xxxxxx").saveMe
+    val unverifiedEmail = "membershiptest@eventsystems.kom"
+    "return 404 for known person with unverified membership" withReqFor("/rest/memberships/" + unverifiedEmail) in { req =>
+      var unverifiedPerson = Person.create.email(unverifiedEmail).firstName("firstname").lastName("lastName").password("xxxxxx").saveMe()
       Membership.create.member(unverifiedPerson.id).boughtBy(person.id).save
-      response(unverifiedEmail) must_== 404
+      response(req) must_== 404
     }
 
-    "return 204 for known person with verified membership" in {
-      Membership.create.member(person.id).boughtBy(person.id).save
-      response(email) must_== 204
+    "return 200 for known person with verified membership" withReqFor("/rest/memberships/" + email) in { req =>
+      Membership.create.member(person.id).boughtBy(Person.create.saveMe().id).save
+      response(req) must_== 200
+    }
+
+    val comEmail = "mem@tull.com"
+    "return 200 for member with .com-extension" withReqFor("/rest/memberships/" + comEmail) in { req =>
+      val comPerson = Person.create.email(comEmail).validated(true).saveMe()
+      Membership.create.member(comPerson.id).boughtBy(comPerson.id).save
+      response(req) must_== 200
     }
   }
 

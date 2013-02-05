@@ -4,7 +4,7 @@ organization := "no.java"
 
 version := "1-SNAPSHOT"
 
-scalaVersion := "2.8.1"
+scalaVersion := "2.9.1"
 
 transitiveClassifiers := Seq("sources")
 
@@ -12,7 +12,7 @@ seq(webSettings :_*)
 
 //Lift dependencies
 libraryDependencies ++= {
-  def lift(module:String, scope:String = "compile") = "net.liftweb" %% ("lift-" + module) % "2.2" % scope
+  def lift(module:String, scope:String = "compile") = "net.liftweb" %% ("lift-" + module) % "2.4" % scope
   Seq(lift("webkit"), lift("wizard"), lift("mapper"), lift("proto"), lift("widgets"), lift("util"), lift("json"), lift("testkit", "test"))
 }
 
@@ -37,8 +37,14 @@ libraryDependencies += "net.sourceforge.nekohtml" % "nekohtml" % "1.9.10"
 
 libraryDependencies += "commons-httpclient" % "commons-httpclient" % "3.1"
 
-libraryDependencies += "org.scala-tools.testing" %% "specs" % "1.6.7" % "test"
-
 libraryDependencies += "org.eclipse.jetty" % "jetty-webapp" % "7.3.0.v20110203" % "container"
 
 
+libraryDependencies += "org.scala-tools.testing" %% "specs" % "1.6.9" % "test"
+
+libraryDependencies += "javax.servlet" % "servlet-api" % "2.5" % "test"
+
+unmanagedClasspath in Test <+= (baseDirectory) map { bd => Attributed.blank(bd / "src/main/webapp") }
+
+
+scalacOptions += "-deprecation"

@@ -13,7 +13,7 @@ object XMLUtil {
     def addChild(newChild: Node) = elem match {
       case Elem(prefix, label, attribs, scope, child@_*) =>
         Elem(prefix, label, attribs, scope, child ++ newChild: _*)
-      case _ => error("Can only add children to elements!")
+      case _ => sys.error("Can only add children to elements!")
     }
   }
 }
