@@ -8,11 +8,27 @@ class UserInformation {
 
   def current(xhtml: NodeSeq): NodeSeq =
     Person.currentUser.map {
-      user => Text(user.niceName) ++ <br/> ++
-          Text(if (user.isMember) S.?("membership.has") else S.?("membership.has.not")) ++ <br/>
-          <a href={Person.logoutPath.mkString("/", "/", "")}><lift:loc.logout/></a>
-    }.openOr{
-      Text(S.?("user.not.logged.in")) ++
-      <br/><a href={Person.loginPath.mkString("/", "/", "")}><lift:loc.login/></a>
+      user => Text(user.niceName)
+    }.openOr {
+      Text(S.?("user.not.logged.in"))
     }
+
+  def hasMembership(xhtml: NodeSeq): NodeSeq =
+    Person.currentUser.map {
+      user => Text(if (user.isMember) S.?("membership.has") else S.?("membership.has.not"))
+    }.openOr(NodeSeq.Empty)
+
+
+  def button(xhtml: NodeSeq): NodeSeq =
+    Person.currentUser.map {
+      user =>
+        <a href={Person.logoutPath.mkString("/", "/", "")}>
+          <lift:loc.logout/>
+        </a>
+    }.openOr {
+      <a href={Person.loginPath.mkString("/", "/", "")}>
+        <lift:loc.login/>
+      </a>
+    }
+
 }

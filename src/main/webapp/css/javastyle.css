@@ -1,0 +1,57 @@
+/* Add header and center it*/
+
+#header_bg {
+background: #3A71A5 url('/images/full_header_bg.gif') 0 0 repeat-x;
+height: 133px;
+margin-bottom: -133px;
+}
+
+#header {
+text-align: center;
+}
+
+/* Override boostrap navbar */
+
+.navbar {
+margin-bottom: 0px;
+}
+
+.navbar-inner {
+min-height: 92px;
+border: 0px;
+-webkit-box-shadow: 0 0px;
+box-shadow: 0 0px;
+}
+
+.navbar-inner {
+background: #FFFFFF url('/images/mainmenu_bg.gif') 0 0 repeat-x;
+height: 92px;
+overflow: hidden;
+padding: 0;
+}
+
+/* Use span instead of a for active menu thingies */
+
+.navbar .nav > .active > span {
+float: none;
+padding: 10px 15px 10px;
+text-decoration: none;
+text-shadow: 0 1px 0 #ffffff;
+color: #555555;
+text-decoration: none;
+background-color: rgba(0,0,0,0.10);
+}
+
+.nav li span {
+display: block;
+}
+
+/* User information box */
+#user-information {
+text-align: right;
+color: #fff;
+position: absolute;
+right: 10px;
+top: 10px;
+line-height: 14px;
+}
