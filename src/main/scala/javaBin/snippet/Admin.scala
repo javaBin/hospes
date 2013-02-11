@@ -42,6 +42,7 @@ class Admin {
     SHtml.ajaxForm(bind("create", template,
       "email" -> emailField,
       "count" -> countField,
-      "submit" -> SHtml.ajaxSubmit(S.?("admin.create.memberships.submit"), create))) % ("class" -> "lift-form")
+      "submit" -> SHtml.ajaxSubmit(S.?("admin.create.memberships.submit"), create) % ("class" -> "btn")
+    )) % ("class" -> "lift-form")
   }
 }

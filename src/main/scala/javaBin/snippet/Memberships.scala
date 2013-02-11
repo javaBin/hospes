@@ -63,7 +63,7 @@ class Memberships {
       val saveButtonText = membership.member.obj.map(_ => S.?("change")).openOr(S.?("save"))
       SHtml.ajaxForm(bind("form", template,
         "email" -> SHtml.text(currentEmail, currentEmail = _),
-        "submit" -> SHtml.ajaxSubmit(saveButtonText, () => submitMember(currentEmail, errorFieldId, infoFieldId, membership, redrawAll)),
+        "submit" -> SHtml.ajaxSubmit(saveButtonText, () => submitMember(currentEmail, errorFieldId, infoFieldId, membership, redrawAll)) % ("class" -> "btn"),
         "info" -> info.openOr(""),
         AttrBindParam("errorId", errorFieldId, "id"),
         AttrBindParam("infoId", infoFieldId, "id")))

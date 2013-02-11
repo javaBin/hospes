@@ -13,7 +13,7 @@ import scala.util.Random
 import scala.math._
 import org.joda.time.DateTime
 
-object Person extends Person with MetaMegaProtoUser[Person] {
+object Person extends Person with PersonWebXhtml with MetaMegaProtoUser[Person] {
   private val forbiddenResponse = () => new ForbiddenResponse("No access")
   val isSuperUser = If(() => Person.currentUser.map(_.superUser.is).openOr(false), forbiddenResponse)
   val isMembershipOwner = If(() => Person.currentUser.map(user => user.membershipsInActiveYear.size > 0).openOr(false), forbiddenResponse)
@@ -58,31 +58,6 @@ object Person extends Person with MetaMegaProtoUser[Person] {
   override lazy val sitemap = List(loginMenuLoc, createUserMenuLoc, lostPasswordMenuLoc, newMemberConfirmationMenuLoc, editUserMenuLoc, changePasswordMenuLoc, validateUserMenuLoc, resetPasswordMenuLoc).flatten(a => a)
 
   override def emailFrom = Props.get("mail.from", super.emailFrom)
-
-  override def loginXhtml = super.loginXhtml % ("class" -> "lift-form")
-  override def editXhtml(user: Person) = super.editXhtml(user) % ("class" -> "lift-form")
-  override def changePasswordXhtml = super.changePasswordXhtml % ("class" -> "lift-form")
-  override def lostPasswordXhtml = super.lostPasswordXhtml % ("class" -> "lift-form")
-  override def passwordResetXhtml = super.passwordResetXhtml % ("class" -> "lift-form")
-
-  override def signupXhtml(user: Person) =
-    <div>
-      <h2>
-        {S.??("sign.up")}
-      </h2>
-      <form method="post" action={S.uri}>
-        <table>
-          {localForm(user, false, signupFields)}<tr>
-          <td>
-            &nbsp;
-          </td>
-          <td>
-              <user:submit/>
-          </td>
-        </tr>
-        </table>
-      </form>
-    </div>
 
   def javaBinStandardGreeting: NodeSeq = (
           <p>
@@ -179,7 +154,7 @@ class Person extends MegaProtoUser[Person] with OneToMany[Long, Person] {
       "footer" -> Person.javaBinStandardGreeting,
       "memberships" -> <a target="_blank" href={membershipLink}>
         {membershipLink}
-      </a>));
+      </a>))
   }
 
   def sendMembershipsReceivedAndUserCreateEmail() {

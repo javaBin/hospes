@@ -12,6 +12,15 @@ text-align: center;
 
 /* Override boostrap navbar */
 
+.navbar-constrainer {
+margin-left: 100px;
+margin-right: 100px;
+}
+
+.navbar li {
+font-weight: bold;
+}
+
 .navbar {
 margin-bottom: 0px;
 }

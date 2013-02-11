@@ -1,36 +1,38 @@
 <lift:surround with="defaultWithoutMsgs" at="content">
-  <h2>Medlemskap</h2>
-  <lift:memberships>
-    <table>
-      <thead>
-      <td width="50%">Epostadresse</td>
-      <td width="20%">Navn</td>
-      <td width="15%">Kjøpt</td>
-      <td width="15%">Status</td>
-      </thead>
-      <list:memberships>
-        <tr>
-          <td>
-            <membership:form>
-              <form:email/>
-              <form:submit/>
-              <br/>
-              <span form:errorId=" " class="field_error"></span>
-              <span form:infoId=" " class="field_info"></span>
-              <form:info/>
-            </membership:form>
-          </td>
-          <td>
-            <membership:name/>
-          </td>
-          <td>
-            <membership:boughtDate/>
-          </td>
-          <td>
-            <membership:status/>
-          </td>
-        </tr>
-      </list:memberships>
-    </table>
-  </lift:memberships>
+    <h2>Medlemskap</h2>
+    <lift:memberships>
+        <table class="table">
+            <thead>
+            <tr>
+                <td width="50%">Epostadresse</td>
+                <td width="20%">Navn</td>
+                <td width="15%">Kjøpt</td>
+                <td width="15%">Status</td>
+            </tr>
+            </thead>
+            <list:memberships>
+                <tr>
+                    <td>
+                        <membership:form>
+                            <form:email/>
+                            <form:submit/>
+                            <div class="alert alert-error" form:errorId=" "></div>
+                            <div class="alert alert-info" form:infoId=" ">
+                                <form:info/>
+                            </div>
+                        </membership:form>
+                    </td>
+                    <td>
+                        <membership:name/>
+                    </td>
+                    <td>
+                        <membership:boughtDate/>
+                    </td>
+                    <td>
+                        <membership:status/>
+                    </td>
+                </tr>
+            </list:memberships>
+        </table>
+    </lift:memberships>
 </lift:surround>
