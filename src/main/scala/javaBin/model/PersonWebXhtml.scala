@@ -8,7 +8,6 @@ import xml.{Elem, NodeSeq}
 trait PersonWebXhtml extends MetaMegaProtoUser[Person] {
   this: Person =>
 
-  override def loginXhtml = super.loginXhtml % ("class" -> "lift-form")
   override def editXhtml(user: Person) = super.editXhtml(user) % ("class" -> "lift-form")
   override def changePasswordXhtml = super.changePasswordXhtml % ("class" -> "lift-form")
   override def lostPasswordXhtml = super.lostPasswordXhtml % ("class" -> "lift-form")
@@ -35,5 +34,33 @@ trait PersonWebXhtml extends MetaMegaProtoUser[Person] {
       </form>
     </div>
 
+  override def loginXhtml =
+    <div>
+      <h2>{S.??("log.in")}</h2>
+      <form method="post" action={S.uri} class="lift-form form-horizontal">
+        <div class="control-group">
+          <label class="control-label" for="userName">{userNameFieldString}</label>
+          <div class="controls">
+            <user:email />
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="password">{S.??("password")}</label>
+          <div class="controls">
+            <user:password />
+          </div>
+        </div>
+        <div class="control-group">
+          <div class="controls">
+            <a href={lostPasswordPath.mkString("/", "/", "")}>{S.??("recover.password")}</a>
+          </div>
+        </div>
+        <div class="control-group">
+          <div class="controls">
+            <user:submit />
+          </div>
+        </div>
+      </form>
+    </div>
 
 }
