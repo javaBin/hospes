@@ -43,6 +43,6 @@ class Admin {
       "email" -> emailField,
       "count" -> countField,
       "submit" -> SHtml.ajaxSubmit(S.?("admin.create.memberships.submit"), create) % ("class" -> "btn")
-    )) % ("class" -> "lift-form")
+    ))
   }
 }

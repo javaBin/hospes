@@ -13,7 +13,7 @@ trait PersonWebXhtml extends MetaMegaProtoUser[Person] {
   override def signupXhtml(user: Person) =
     <div>
       <h2>{S.??("sign.up")}</h2>
-      <form method="post" action={S.uri} class="lift-form form-horizontal">
+      <form method="post" action={S.uri} class="form-horizontal">
         { localForm(user, ignorePassword = false, signupFields) }
         { bootstrapSubmit }
       </form>
@@ -22,7 +22,7 @@ trait PersonWebXhtml extends MetaMegaProtoUser[Person] {
   override def loginXhtml =
     <div>
       <h2>{S.??("log.in")}</h2>
-      <form method="post" action={S.uri} class="lift-form form-horizontal">
+      <form method="post" action={S.uri} class="form-horizontal">
         { bootstrapField("userName", userNameFieldString, <user:email />) }
         { bootstrapField("password", S.??("password"), <user:password />) }
         <div class="control-group">
@@ -38,7 +38,7 @@ trait PersonWebXhtml extends MetaMegaProtoUser[Person] {
     <div>
       <h2>Gjenopprett passord</h2>
       <p>{S.??("enter.email")}</p>
-      <form method="post" action={S.uri} class="lift-form form-horizontal">
+      <form method="post" action={S.uri} class="form-horizontal">
         { bootstrapField("email", userNameFieldString, <user:email />) }
         { bootstrapSubmit }
       </form>
@@ -56,7 +56,7 @@ trait PersonWebXhtml extends MetaMegaProtoUser[Person] {
   override def editXhtml(user: Person) =
     <div>
       <h2>{S.??("edit")}</h2>
-      <form method="post" action={S.uri} class="lift-form form-horizontal">
+      <form method="post" action={S.uri} class="form-horizontal">
         { localForm(user, ignorePassword = true, editFields) }
         { bootstrapSubmit }
       </form>
@@ -65,7 +65,7 @@ trait PersonWebXhtml extends MetaMegaProtoUser[Person] {
   override def changePasswordXhtml =
     <div>
       <h2>{S.??("change.password")}</h2>
-      <form method="post" action={S.uri} class="lift-form form-horizontal">
+      <form method="post" action={S.uri} class="form-horizontal">
         { bootstrapField("old-password", S.??("old.password"), <user:old_pwd />) }
         { bootstrapField("new-password", S.??("new.password"), <user:new_pwd />) }
         { bootstrapField("repeat-password", S.??("repeat.password"), <user:new_pwd />) }
@@ -76,7 +76,7 @@ trait PersonWebXhtml extends MetaMegaProtoUser[Person] {
   override def passwordResetXhtml =
     <div>
       <h2>S.??("reset.your.password")</h2>
-      <form method="post" action={S.uri} class="lift-form form-horizontal">
+      <form method="post" action={S.uri} class="form-horizontal">
         { bootstrapField("password", S.??("enter.your.new.password"), <user:pwd />) }
         { bootstrapField("repeat-password", S.??("repeat.your.new.password"), <user:pwd />) }
         { bootstrapSubmit }
