@@ -66,7 +66,7 @@ class Memberships {
         "submit" -> SHtml.ajaxSubmit(saveButtonText, () => submitMember(currentEmail, errorFieldId, infoFieldId, membership, redrawAll)) % ("class" -> "btn"),
         "info" -> info.openOr(""),
         AttrBindParam("errorId", errorFieldId, "id"),
-        AttrBindParam("infoId", infoFieldId, "id")))
+        AttrBindParam("infoId", infoFieldId, "id"))) % ("class" -> "form-inline")
     }
   }
   
