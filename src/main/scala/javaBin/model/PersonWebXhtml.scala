@@ -14,7 +14,7 @@ trait PersonWebXhtml extends MetaMegaProtoUser[Person] {
     <div>
       <h2>{S.??("sign.up")}</h2>
       <form method="post" action={S.uri} class="lift-form form-horizontal">
-        { localForm(user, false, signupFields) }
+        { localForm(user, ignorePassword = false, signupFields) }
         { bootstrapSubmit }
       </form>
     </div>
@@ -57,7 +57,7 @@ trait PersonWebXhtml extends MetaMegaProtoUser[Person] {
     <div>
       <h2>{S.??("edit")}</h2>
       <form method="post" action={S.uri} class="lift-form form-horizontal">
-        { localForm(user, true, editFields) }
+        { localForm(user, ignorePassword = true, editFields) }
         { bootstrapSubmit }
       </form>
     </div>
