@@ -2,37 +2,32 @@
 
 
   <lift:Admin.createMemberships>
-    <h2>Opprett nye javaBin-medlemskap</h2>
-    <table>
-      <tr>
-        <td>Epostaddresse for eier:</td>
-        <td>
-          <create:email/>
-        </td>
-        <td>
-          <lift:msg id="emailError" errorClass="field_error"/>
-          <span id="emailError" class="field_error"></span>
-        </td>
-      </tr>
-      <tr>
-        <td>Antall:</td>
-        <td>
-          <create:count/>
-        </td>
-        <td>
-          <lift:msg id="countError" errorClass="field_error"/>
-        </td>
-      </tr>
-      <tr>
-        <td>&nbsp;</td>
-        <td>
-          <create:submit/>
-        </td>
-        <td>&nbsp;</td>
-      </tr>
-    </table>
-  </lift:Admin.createMemberships>
+    <p><lift:msgs><lift:notice_class>alert alert-info notices</lift:notice_class></lift:msgs></p>
 
-  <p><lift:msgs><lift:notice_class>field_notice</lift:notice_class></lift:msgs></p>
+    <h2>Opprett nye javaBin-medlemskap</h2>
+
+    <div class="control-group">
+      <label class="control-label" for="email">Epostaddresse for eier</label>
+      <div class="controls">
+          <create:email/>
+          <lift:msg id="emailError" errorClass="text-error"/>
+          <span id="emailError" class="text-error"></span>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label class="control-label" for="count">Antall</label>
+      <div class="controls">
+          <create:count/>
+          <lift:msg id="countError" errorClass="text-error"/>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <div class="controls">
+          <create:submit/>
+      </div>
+    </div>
+  </lift:Admin.createMemberships>
 
 </lift:surround>
