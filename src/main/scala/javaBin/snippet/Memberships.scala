@@ -18,7 +18,7 @@ class Memberships {
 
   private def submitMember(emailField: => String, errorFieldId: String, infoFieldId: String, membership: Membership, redrawAll: () => JsCmd): JsCmd = {
     var jsCmd = JsCmds.Noop
-    val email = emailField
+    val email = emailField.trim.toLowerCase
     val person = Person.find(By(Person.email, email)).openOr {
       val person = Person.create
       person.email.set(email)
