@@ -23,17 +23,17 @@ class Boot {
     val memberships2011P1 = for (i <- 0 until 10) yield Membership.create.year(2011).saveMe()
     val memberships2012P1 = for (i <- 0 until 8) yield Membership.create.year(2012).saveMe()
     val memberships2013P1 = for (i <- 0 until 9) yield Membership.create.year(2013).saveMe()
-    (0 until 30).map{
+    (0 until 30).map {
       personNumber =>
         val person = Person.create
         val personName = "Person" + personNumber
         person.email("person" + personNumber + "@lainternet.com")
-            .firstName(personName)
-            .lastName("Personson")
-            .password("passord")
-            .superUser(personNumber == 1)
-            .validated(personNumber != 2)
-            .save()
+          .firstName(personName)
+          .lastName("Personson")
+          .password("passord")
+          .superUser(personNumber == 1)
+          .validated(personNumber != 2)
+          .save()
         if (personNumber == 0) {
           (memberships2011P0 ++ memberships2012P0 ++ memberships2013P0).map(_.boughtBy(person.id).save())
         } else if (personNumber == 1) {
@@ -99,7 +99,7 @@ class Boot {
     System.setProperty("file.encoding", "UTF-8")
     LiftRules.localeCalculator = _ => Locale.getDefault
 
-    LiftRules.liftRequest.append{
+    LiftRules.liftRequest.append {
       case Req("h2" :: _, _, _) => false
     }
 
@@ -123,12 +123,15 @@ class Boot {
       () => new NotFoundResponse("Mailing lists not defined"))
     val entries =
       (Menu(S.?("home.menu.title")) / "index") ::
-      ((Menu("hidden") / "openid" / "form") >> Loc.Hidden) ::
-      Person.sitemap :::
-      (Menu(S.?("admin.menu.title")) / Membership.adminPath >> Person.loginFirst >> Person.isSuperUser) ::
-      (Menu(S.?("mailing.lists.menu.title")) / MailingListSubscription.mailingListsPath >> Person.loginFirst >> mailingListsDefined) ::
-      (Menu(S.?("memberships.menu.title")) / Membership.membershipsPath >> Person.loginFirst >> Person.isMembershipOwner) ::
-      Person.logoutMenuLoc.toList
+        ((Menu("hidden") / "openid" / "form") >> Loc.Hidden) ::
+        Person.sitemap :::
+        (Menu(S.?("mailing.lists.menu.title")) / MailingListSubscription.mailingListsPath >> Person.loginFirst >> mailingListsDefined) ::
+        (Menu(S.?("memberships.menu.title")) / Membership.membershipsPath >> Person.loginFirst >> Person.isMembershipOwner) ::
+        (Menu(S.?("admin.menu.title")) / Membership.adminPath >> Person.loginFirst >> Person.isSuperUser submenus (
+          (Menu(S.?("mailing.lists.menu.title")) / "tull" >> Person.loginFirst >> mailingListsDefined) ::
+            (Menu(S.?("memberships.menu.title")) / "ball" >> Person.loginFirst >> Person.isMembershipOwner) :: Nil
+          )) ::
+        Person.logoutMenuLoc.toList
 
     LiftRules.setSiteMapFunc(() => SiteMap(entries: _*))
 
