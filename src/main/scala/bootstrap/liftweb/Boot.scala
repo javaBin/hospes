@@ -11,8 +11,9 @@ import net.liftweb.mapper.{Schemifier, DB, StandardDBVendor, DefaultConnectionId
 import net.liftweb.sitemap.{SiteMap, Menu, Loc}
 import net.liftweb.util.{LoggingAutoConfigurer, Mailer, Props}
 import javaBin.rest.{MailingListResource, MembershipResource}
-import net.liftweb.sitemap.Loc.If
+import net.liftweb.sitemap.Loc.{Hidden, If}
 import net.liftweb.common.{Logger, Empty, Full}
+import javaBin.snippet.{MembershipsSearch, CreateMemberships}
 
 class Boot {
 
@@ -125,12 +126,10 @@ class Boot {
       (Menu(S.?("home.menu.title")) / "index") ::
         ((Menu("hidden") / "openid" / "form") >> Loc.Hidden) ::
         Person.sitemap :::
-        (Menu(S.?("mailing.lists.menu.title")) / MailingListSubscription.mailingListsPath >> Person.loginFirst >> mailingListsDefined) ::
-        (Menu(S.?("memberships.menu.title")) / Membership.membershipsPath >> Person.loginFirst >> Person.isMembershipOwner) ::
-        (Menu(S.?("admin.menu.title")) / Membership.adminPath >> Person.loginFirst >> Person.isSuperUser submenus (
-          (Menu(S.?("mailing.lists.menu.title")) / "tull" >> Person.loginFirst >> mailingListsDefined) ::
-            (Menu(S.?("memberships.menu.title")) / "ball" >> Person.loginFirst >> Person.isMembershipOwner) :: Nil
-          )) ::
+        (Menu(S.?("mailing.lists.menu.title")) / MailingListSubscription.path >> Person.loginFirst >> mailingListsDefined) ::
+        (Menu(S.?("memberships.menu.title")) / Membership.path >> Person.loginFirst >> Person.isMembershipOwner) ::
+        (Menu(S.?("admin.menu.title")) / MembershipsSearch.path >> Person.loginFirst >> Person.isSuperUser) ::
+        (Menu(S.?("create.memberships.menu.title")) / CreateMemberships.path >> Hidden >> Person.loginFirst >> Person.isSuperUser) ::
         Person.logoutMenuLoc.toList
 
     LiftRules.setSiteMapFunc(() => SiteMap(entries: _*))

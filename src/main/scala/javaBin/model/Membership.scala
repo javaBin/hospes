@@ -7,8 +7,7 @@ import net.liftweb.util.Props
 
 object Membership extends Membership with LongKeyedMetaMapper[Membership] with CRUDify[Long, Membership] {
 
-  def membershipsPath = "memberships"
-  def adminPath = "admin"
+  def path = "memberships"
   def activeMembershipYear = Props.getInt("membership.year") openOr new DateTime().getYear
 
   def createMany(i: Int, person: Person) {

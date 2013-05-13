@@ -8,7 +8,12 @@ import javaBin.model.{Person, Membership}
 import net.liftweb.mapper.{By, MappedEmail}
 import net.liftweb.common.Empty
 
-class Admin {
+object CreateMemberships {
+  def path = "create_memberships"
+}
+
+class CreateMemberships {
+
   def createMemberships(template: NodeSeq): NodeSeq = {
     var email = ""
     var count = ""
@@ -45,4 +50,5 @@ class Admin {
       "submit" -> SHtml.ajaxSubmit(S.?("admin.create.memberships.submit"), create) % ("class" -> "btn")
     )) % ("class" -> "form-horizontal")
   }
+
 }

@@ -148,7 +148,7 @@ class Person extends MegaProtoUser[Person] with OneToMany[Long, Person] {
   }
 
   def sendMembershipsReceivedEmail() {
-    val membershipLink = (S.hostAndPath :: Membership.membershipsPath :: Nil).mkString("/")
+    val membershipLink = (S.hostAndPath :: Membership.path :: Nil).mkString("/")
     mailMe(bind("info", template("mail-memberships-received-old-user"),
       "boughtBy" -> shortName,
       "footer" -> Person.javaBinStandardGreeting,
