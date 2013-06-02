@@ -1,3 +1,63 @@
 <lift:surround with="defaultAdmin" at="content">
 
+    <lift:membershipsSearch>
+        <search:form>
+            <h2>Søk etter javaBin-medlemskap</h2>
+
+            <div class="control-group">
+                <label class="control-label" for="year">År</label>
+
+                <div class="controls">
+                    <search:years/>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" for="email">Epostadresse</label>
+
+                <div class="controls">
+                    <search:email/>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <div class="controls">
+                    <search:submit/>
+                </div>
+            </div>
+        </search:form>
+
+        <table class="table">
+            <thead>
+            <tr>
+                <th width="25%">Medlem</th>
+                <th width="25%">Kjøper</th>
+                <th width="15%">År</th>
+                <th width="20%">Kjøpt</th>
+                <th width="15%">Status</th>
+            </tr>
+            </thead>
+            <search:results>
+                <tr>
+                    <td>
+                        <membership:memberEmail/>
+                    </td>
+                    <td>
+                        <membership:boughtByEmail/>
+                    </td>
+                    <td>
+                        <membership:year/>
+                    </td>
+                    <td>
+                        <membership:boughtDate/>
+                    </td>
+                    <td>
+                        <membership:status/>
+                    </td>
+                </tr>
+            </search:results>
+        </table>
+
+    </lift:membershipsSearch>
+
 </lift:surround>

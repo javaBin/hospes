@@ -5,7 +5,7 @@ mail.smtp.host=localhost
 webshop.user=webshop
 webshop.password=webschopp
 
-membership.year=2012
+membership.year=2013
 
 mailing.list.user=mailinglist
 mailing.list.password=schmailinglist

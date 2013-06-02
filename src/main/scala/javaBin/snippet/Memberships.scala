@@ -78,13 +78,10 @@ class Memberships {
     }
     pair(user.membershipsInActiveYear, lastYearsMemberships).flatMap(tupled {
       (membership, lastYearsMembership) =>
-        val status = membership.member.obj
-                .map(person => if (person.validated.is) S.?("membership.status.active") else S.?("membership.status.not.validated"))
-                .openOr(S.?("membership.status.unassigned"))
         bind("membership", template,
           "boughtDate" -> dateTimeFormatter.print(new DateTime(membership.boughtDate.get)),
           "name" -> Text(membership.member.obj.flatMap(_.nameBox).openOr("-")),
-          "status" -> Text(status),
+          "status" -> Text(membership.status),
           "form" -> bindForm(membership, lastYearsMembership, redrawAll) _)
     })
   }
