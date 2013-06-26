@@ -38,8 +38,8 @@ class MembershipsSearch {
   def renderResults(form: Form)(template: NodeSeq): NodeSeq =
     form.results.flatMap { membership =>
       bind("membership", template,
-        "boughtByEmail" -> Text(membership.boughtBy.obj.map(_.email.is).getOrElse("")),
-        "memberEmail" -> Text(membership.member.obj.map(_.email.is).getOrElse("")),
+        "boughtByEmail" -> Text(membership.boughtBy.obj.map(_.niceName).getOrElse("")),
+        "memberEmail" -> Text(membership.member.obj.map(_.niceName).getOrElse("")),
         "year" -> Text(membership.year.is.toString),
         "boughtDate" -> dateTimeFormatter.print(new DateTime(membership.boughtDate.get)),
         "status" -> Text(membership.status))
