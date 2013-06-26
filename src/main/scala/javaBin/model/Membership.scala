@@ -29,14 +29,20 @@ object Membership extends Membership with LongKeyedMetaMapper[Membership] with C
   def search(year: Int, email: String): List[Membership] = {
     val emailPattern = "%" + email + "%"
     Membership.findAllByPreparedStatement({ superConnection =>
-      val statement = superConnection.connection.prepareStatement(
-        "select m.* from Membership m " +
-        "left outer join Person pm on pm.id = m.member_person_id  " +
-        "left outer join Person pb on pb.id = m.bought_by_person_id " +
-        "where m.year = ? and (pm.email like ? or pb.email like ?)")
+      val statement = superConnection.connection.prepareStatement("""
+        select m.* from Membership m
+        left outer join Person pm on pm.id = m.member_person_id
+        left outer join Person pb on pb.id = m.bought_by_person_id
+        where m.year = ? and
+        (pm.email like ? or pm.firstName like ? or pm.lastName like ?
+        or pb.email like ? or pb.firstName like ? or pb.lastName like ?)""")
       statement.setInt(1, year)
       statement.setString(2, emailPattern)
       statement.setString(3, emailPattern)
+      statement.setString(4, emailPattern)
+      statement.setString(5, emailPattern)
+      statement.setString(6, emailPattern)
+      statement.setString(7, emailPattern)
       statement
     })
   }
