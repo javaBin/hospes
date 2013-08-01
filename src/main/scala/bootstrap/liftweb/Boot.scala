@@ -104,7 +104,7 @@ class Boot {
       case Req("h2" :: _, _, _) => false
     }
 
-    LiftRules.fixCSS("css" :: "java_membership" :: Nil, Empty)
+    LiftRules.fixCSS("css" :: "javastyle" :: Nil, Empty)
 
     setupEmail()
     Boot.databaseSetup()

@@ -16,6 +16,7 @@ libraryDependencies ++= {
   Seq(lift("webkit"), lift("wizard"), lift("mapper"), lift("proto"), lift("widgets"), lift("util"), lift("json"), lift("testkit", "test"))
 }
 
+env in Compile := Some(file(".") / "jetty-env.xml" asFile)
 
 libraryDependencies += "net.databinder" %% "dispatch-http" % "0.7.8"
 
@@ -37,7 +38,7 @@ libraryDependencies += "net.sourceforge.nekohtml" % "nekohtml" % "1.9.10"
 
 libraryDependencies += "commons-httpclient" % "commons-httpclient" % "3.1"
 
-libraryDependencies += "org.eclipse.jetty" % "jetty-webapp" % "7.3.0.v20110203" % "container"
+libraryDependencies += "org.eclipse.jetty" % "jetty-plus" % "7.4.5.v20110725" % "container"
 
 
 libraryDependencies += "org.scala-tools.testing" %% "specs" % "1.6.9" % "test"
