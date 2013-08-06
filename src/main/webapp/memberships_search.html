@@ -27,36 +27,73 @@
             </div>
         </search:form>
 
-        <table class="table">
-            <thead>
-            <tr>
-                <th width="25%">Medlem</th>
-                <th width="25%">Kjøper</th>
-                <th width="15%">År</th>
-                <th width="20%">Kjøpt</th>
-                <th width="15%">Status</th>
-            </tr>
-            </thead>
-            <search:results>
+        <div class="well">
+            <search:count/> medlemskap funnet; <search:countApplied/> tildelt
+            <div class="pull-right">
+                <a href="#delete-modal" role="button" class="btn btn-danger" data-toggle="modal">Slett...</a>
+                <div id="delete-modal" class="modal hide fade">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h3>Bekreft</h3>
+                    </div>
+                    <div class="modal-body">
+                        <p>Slett valgte abonnementer</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn" data-dismiss="modal" aria-hidden="true">Avbryt</button>
+                        <search:deleteSelected/>
+                    </div>
+                </div>
+                <a href="#unapply-modal" role="button" class="btn btn-danger" data-toggle="modal">Fradel...</a>
+                <div id="unapply-modal" class="modal hide fade">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h3>Bekreft</h3>
+                    </div>
+                    <div class="modal-body">
+                        <p>Fradel valgte abonnementer</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn" data-dismiss="modal" aria-hidden="true">Avbryt</button>
+                        <search:unapplySelected/>
+                    </div>
+                </div>
+            </div>
+            <table class="table">
+                <thead>
                 <tr>
-                    <td>
-                        <membership:memberEmail/>
-                    </td>
-                    <td>
-                        <membership:boughtByEmail/>
-                    </td>
-                    <td>
-                        <membership:year/>
-                    </td>
-                    <td>
-                        <membership:boughtDate/>
-                    </td>
-                    <td>
-                        <membership:status/>
-                    </td>
+                    <th width="25%">Medlem</th>
+                    <th width="25%">Kjøper</th>
+                    <th width="10%">År</th>
+                    <th width="15%">Kjøpt</th>
+                    <th width="15%">Status</th>
+                    <th width="10%">Velg</th>
                 </tr>
-            </search:results>
-        </table>
+                </thead>
+                <search:results>
+                    <tr>
+                        <td>
+                            <membership:memberEmail/>
+                        </td>
+                        <td>
+                            <membership:boughtByEmail/>
+                        </td>
+                        <td>
+                            <membership:year/>
+                        </td>
+                        <td>
+                            <membership:boughtDate/>
+                        </td>
+                        <td>
+                            <membership:status/>
+                        </td>
+                        <td>
+                            <membership:select/>
+                        </td>
+                    </tr>
+                </search:results>
+            </table>
+        </div>
 
     </lift:membershipsSearch>
 
