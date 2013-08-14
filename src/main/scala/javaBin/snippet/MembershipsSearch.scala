@@ -98,6 +98,8 @@ class MembershipsSearch extends Logger {
     }
     <span id={resultId}>{
       bind("search", template,
+        "selectAll" -> ((t: NodeSeq) => SHtml.a(() => form.selectAll(resultId, template, true), t)),
+        "selectNone" -> ((t: NodeSeq) => SHtml.a(() => form.selectAll(resultId, template, false), t)),
         "moveForm" -> moveForm(resultId, template, form) _,
         "deleteSelected" -> SHtml.ajaxButton(S.?("admin.memberships.delete"),
           () => form.verifyChangesOnSelection(resultId, template, "#delete-modal", deleteMembership)) %
@@ -127,6 +129,10 @@ class MembershipsSearch extends Logger {
     def verifyChangesOnSelection(resultId: String, template: NodeSeq, modalName: String, f: Membership => Unit) = {
       selected.foreach(f)
       jsBootstrapModalClose(modalName) & JsCmds.Replace(resultId, render(template, load))
+    }
+    def selectAll(resultId: String, template: NodeSeq, select: Boolean) = {
+      selected = if (select) results.toSet else Set()
+      JsCmds.Replace(resultId, render(template, this))
     }
   }
 
