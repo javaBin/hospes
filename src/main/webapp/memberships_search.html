@@ -29,34 +29,58 @@
 
         <div class="well">
             <search:count/> medlemskap funnet; <search:countApplied/> tildelt
-            <div class="pull-right">
+            <div class="pull-right btn-group">
+                <a href="#move-modal" role="button" class="btn btn-danger" data-toggle="modal">Flytt...</a>
                 <a href="#delete-modal" role="button" class="btn btn-danger" data-toggle="modal">Slett...</a>
-                <div id="delete-modal" class="modal hide fade">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                        <h3>Bekreft</h3>
-                    </div>
-                    <div class="modal-body">
-                        <p>Slett valgte abonnementer</p>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn" data-dismiss="modal" aria-hidden="true">Avbryt</button>
-                        <search:deleteSelected/>
-                    </div>
-                </div>
                 <a href="#unapply-modal" role="button" class="btn btn-danger" data-toggle="modal">Fradel...</a>
-                <div id="unapply-modal" class="modal hide fade">
+            </div>
+            <div id="move-modal" class="modal hide fade">
+                <search:moveForm>
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                         <h3>Bekreft</h3>
                     </div>
                     <div class="modal-body">
-                        <p>Fradel valgte abonnementer</p>
+                        <p class="text-error">
+                            <form:message/>
+                        </p>
+                        <div class="control-group">
+                            <label class="control-label" for="moveEmail">Flytt valgte abonnementer til</label>
+                            <div class="controls">
+                                <form:email/>
+                            </div>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button class="btn" data-dismiss="modal" aria-hidden="true">Avbryt</button>
-                        <search:unapplySelected/>
+                        <form:moveSelected/>
                     </div>
+                </search:moveForm>
+            </div>
+            <div id="delete-modal" class="modal hide fade">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h3>Bekreft</h3>
+                </div>
+                <div class="modal-body">
+                    <p>Slett valgte abonnementer</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn" data-dismiss="modal" aria-hidden="true">Avbryt</button>
+                    <search:deleteSelected/>
+                </div>
+            </div>
+            <div id="unapply-modal" class="modal hide fade">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h3>Bekreft</h3>
+                </div>
+                <div class="modal-body">
+                    <p>Fradel valgte abonnementer</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn" data-dismiss="modal" aria-hidden="true">Avbryt</button>
+                    <search:unapplySelected/>
                 </div>
             </div>
             <table class="table">
