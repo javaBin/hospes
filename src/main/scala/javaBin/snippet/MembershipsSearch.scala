@@ -98,8 +98,8 @@ class MembershipsSearch extends Logger {
     }
     <span id={resultId}>{
       bind("search", template,
-        "selectAll" -> ((t: NodeSeq) => SHtml.a(() => form.selectAll(resultId, template, true), t)),
-        "selectNone" -> ((t: NodeSeq) => SHtml.a(() => form.selectAll(resultId, template, false), t)),
+        "selectAll" -> ((t: NodeSeq) => SHtml.a(() => form.selectAll(resultId, template, select = true), t)),
+        "selectNone" -> ((t: NodeSeq) => SHtml.a(() => form.selectAll(resultId, template, select = false), t)),
         "moveForm" -> moveForm(resultId, template, form) _,
         "deleteSelected" -> SHtml.ajaxButton(S.?("admin.memberships.delete"),
           () => form.verifyChangesOnSelection(resultId, template, "#delete-modal", deleteMembership)) %
