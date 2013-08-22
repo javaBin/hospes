@@ -75,7 +75,7 @@ trait PersonWebXhtml extends MetaMegaProtoUser[Person] {
 
   override def passwordResetXhtml =
     <div>
-      <h2>S.??("reset.your.password")</h2>
+      <h2>{S.??("reset.your.password")}</h2>
       <form method="post" action={S.uri} class="form-horizontal">
         { bootstrapField("password", S.??("enter.your.new.password"), <user:pwd />) }
         { bootstrapField("repeat-password", S.??("repeat.your.new.password"), <user:pwd />) }
