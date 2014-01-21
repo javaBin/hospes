@@ -11,10 +11,9 @@ transitiveClassifiers := Seq("sources")
 seq(webSettings :_*)
 
 //Lift dependencies
-libraryDependencies ++= {
-  def lift(module:String, scope:String = "compile") = "net.liftweb" %% ("lift-" + module) % "2.4" % scope
-  Seq(lift("webkit"), lift("wizard"), lift("mapper"), lift("proto"), lift("widgets"), lift("util"), lift("json"), lift("testkit", "test"))
-}
+def lift(module:String, scope:String = "compile") = "net.liftweb" %% ("lift-" + module) % "2.4" % scope
+
+libraryDependencies ++= Seq(lift("webkit"), lift("wizard"), lift("mapper"), lift("proto"), lift("widgets"), lift("util"), lift("json"), lift("testkit", "test"))
 
 env in Compile := Some(file(".") / "jetty-env.xml" asFile)
 
