@@ -1,1 +1,1 @@
-addSbtPlugin("com.earldouglas" % "xsbt-web-plugin" % "0.6.0")
+addSbtPlugin("com.earldouglas" % "xsbt-web-plugin" % "1.0.0")

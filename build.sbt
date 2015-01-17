@@ -8,14 +8,14 @@ scalaVersion := "2.9.1"
 
 transitiveClassifiers := Seq("sources")
 
-seq(webSettings :_*)
+//seq(webSettings :_*)
 
 //Lift dependencies
 def lift(module:String, scope:String = "compile") = "net.liftweb" %% ("lift-" + module) % "2.4" % scope
 
 libraryDependencies ++= Seq(lift("webkit"), lift("wizard"), lift("mapper"), lift("proto"), lift("widgets"), lift("util"), lift("json"), lift("testkit", "test"))
 
-env in Compile := Some(file(".") / "jetty-env.xml" asFile)
+//env in Compile := Some(file(".") / "jetty-env.xml" asFile)
 
 libraryDependencies += "net.databinder" %% "dispatch-http" % "0.7.8"
 
@@ -37,7 +37,8 @@ libraryDependencies += "net.sourceforge.nekohtml" % "nekohtml" % "1.9.10"
 
 libraryDependencies += "commons-httpclient" % "commons-httpclient" % "3.1"
 
-libraryDependencies += "org.eclipse.jetty" % "jetty-plus" % "7.4.5.v20110725" % "container"
+//libraryDependencies += "org.eclipse.jetty" % "jetty-plus" % "7.4.5.v20110725" % "container"
+jetty()
 
 
 libraryDependencies += "org.scala-tools.testing" %% "specs" % "1.6.9" % "test"
